@@ -1,8 +1,8 @@
 
 public class Pixel
 {
-   int fila;
-   int columna;
+   private int fila;
+   private int columna;
    public Pixel(int fila,int columna){
        this.fila=fila;
        this.columna=columna;
