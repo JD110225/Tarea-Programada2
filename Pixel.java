@@ -4,9 +4,10 @@ public class Pixel {
    private int columna;
    private int color;
    
-   public Pixel(int fila,int columna){
+   public Pixel(int fila,int columna,int color){
        this.fila=fila;
        this.columna=columna;
+       this.color=color;
    }
    
    public int getFila(){
