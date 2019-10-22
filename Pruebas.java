@@ -4,18 +4,15 @@ public class Pruebas
    public static final int[] sumaC={  0, 1, 1, 1, 0,-1,-1,-1 };
    private Imagen imagen;
    private int[][] matrizImagen;
-   private int[][] matrizImagenNueva; 
-   public Pruebas(){       
-       matrizImagen=new int[][]{{1,1,1,2,2,1,1,1,1,2,2,2,2},{1,1,2,1,2,1,1,1,1,1,2,2,2}};
-       //imagen=new Imagen("ImagenPrueba3.gif");
-       imagen=new Imagen(matrizImagen);
+   private Pixel fondo;
+   public Pruebas(){
+       imagen=new Imagen("ImagenPrueba.gif");
        imagen.dibujar();
        matrizImagen=imagen.getMatriz();
-       matrizImagenNueva=new int[matrizImagen.length][matrizImagen[0].length];
+       fondo=new Pixel(0,0,matrizImagen[0][0]);
        for(int f=0;f<matrizImagen.length;++f){
            for(int c=0;c<matrizImagen[0].length;++c){
                System.out.print(matrizImagen[f][c]+" ");
-               matrizImagenNueva[f][c]=-1;//Hacer matriz de puros pixeles blancos
             }
        System.out.println();
         }
@@ -60,7 +57,6 @@ public class Pruebas
       return pixelesVecinos;
    }
     public Pixel findBorde(){
-        Pixel fondo=new Pixel(0,0,matrizImagen[0][0]);
         Pixel borde=fondo; 
         boolean encontrado=false;
         for(int f=0;f<matrizImagen.length;f++){
@@ -73,47 +69,49 @@ public class Pruebas
     }
         return borde;
     }
-    public void anadirPixelMatriz(Pixel pixel){
+    public void anadirPixelMatriz(Pixel pixel,int[][] matriz){
         if(pixel!=null){
             int fila=pixel.getFila();
             int columna=pixel.getColumna();
-            matrizImagenNueva[fila][columna]=pixel.getColor();
+            matriz[fila][columna]=pixel.getColor();
     }
     }
-    public boolean estaEnMatriz(Pixel pixel){
+    public boolean estaEnMatriz(Pixel pixel,int [][] matriz){
       int fila=pixel.getFila();
       int columna=pixel.getColumna();
-      return matrizImagenNueva[fila][columna]==pixel.getColor();
+      return matriz[fila][columna]==pixel.getColor();
     }
-    /*
-     * ESTA VAINA NO FUNCIONA IDK POR QUE...
-    public void algoritmoExpansion(Pixel pixel){
-        anadirPixelMatriz(pixel);
+    public void algoritmoExpansion(Pixel pixel,int[][] matriz){
+        anadirPixelMatriz(pixel,matriz);
         int fila=pixel.getFila();
         int columna=pixel.getColumna();
         for(Pixel p:vecinosIgualesBorde(fila,columna)){
-            if(p!=null && !estaEnMatriz(p)){
-                anadirPixelMatriz(p);
-                algoritmoExpansion(p);
+            if(p!=null && !estaEnMatriz(p,matriz)){
+                algoritmoExpansion(p,matriz);
             }
     }
-    
+}
+    public int[][] crearMatrizBlanca(){
+       int[][] matrizImagenNueva=new int[matrizImagen.length][matrizImagen[0].length];
+       for(int f=0;f<matrizImagen.length;++f){
+           for(int c=0;c<matrizImagen[0].length;++c){
+               matrizImagenNueva[f][c]=-1;//Hacer matriz de puros pixeles blancos
+            }
+        }
+       return matrizImagenNueva;
     }
-    */
-    public void showNuevaImagen(){
+    public Figura crearFigura(){
+        int[][] matriz=crearMatrizBlanca();
         Pixel borde=findBorde();
-        anadirPixelMatriz(borde);
-        int fila=borde.getFila();
-        int columna=borde.getColumna();
-        for(Pixel p:vecinosIgualesBorde(fila,columna)){
-            if(p!=null && !estaEnMatriz(p)){
-                anadirPixelMatriz(p);
-    }
-    }
-    Imagen nuevaImagen=new Imagen(matrizImagenNueva);
-    nuevaImagen.dibujar();
+        algoritmoExpansion(borde,matriz);
+        Figura figura=new Figura(matriz);
+        return figura;
 }
 }
+
+    
+    
+
 
     
     
