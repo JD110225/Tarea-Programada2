@@ -5,7 +5,9 @@ public class Pruebas
    private Imagen imagen;
    private int[][] matrizImagen;
    private Pixel fondo;
+   private Catalogo catalogo;
    public Pruebas(){
+       catalogo=new Catalogo();
        imagen=new Imagen("ImagenPrueba.gif");
        imagen.dibujar();
        matrizImagen=imagen.getMatriz();
@@ -107,11 +109,38 @@ public class Pruebas
         Figura figura=new Figura(matriz);
         return figura;
 }
+    public void quitarFigura(Figura figura){
+        int[][] matrizFigura=figura.getMatriz();
+        for(int f=0;f<matrizImagen.length;++f){
+            for(int c=0;c<matrizImagen[0].length;++c){
+                int color=matrizImagen[f][c];
+                if(color==matrizFigura[f][c] && color!=fondo.getColor()){
+                    matrizImagen[f][c]=fondo.getColor();
+                }
+            }
+        }
+    }
+    public boolean sinFiguras(int[][] matriz){
+        boolean sinFiguras=true;
+        int inicial=matriz[0][0];
+        for(int f=0;f<matriz.length;++f){
+            for(int c=0;c<matriz[0].length;++c){
+                if(matriz[f][c]!=inicial){
+                    sinFiguras=false;
+                }
+            }
+        }
+        return sinFiguras;
+    }
+    public void segmentacion(){
+        while(!sinFiguras(matrizImagen)){
+            Figura figura=crearFigura();
+            quitarFigura(figura);
+            catalogo.agregarFigura(figura);
+        }
+        catalogo.verCatalogo();
+    }
 }
-
-    
-    
-
 
     
     
