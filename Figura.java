@@ -15,29 +15,26 @@ public class Figura{
     this.colorFondo=colorFondo;
     }
      */
-    public Figura(){
+    public Figura(int [][] matriz){
         this.matriz=matriz;
         dimensiones = new int [2];
     }
 
     public int [] encontrarDimensiones(){
         int extremos [] = new int [4];
-        Imagen a1 = new Imagen("9.gif");//ToDo remover.
-        int m [][] = a1.getMatriz();
-        //
-        Pixel arriba = encontrarPixelArriba(m);
+        Pixel arriba = encontrarPixelArriba(matriz);
         int filaArriba = arriba.getFila();
         extremos[0] = filaArriba;
         //
-        Pixel abajo = encontrarPixelAbajo(m);
+        Pixel abajo = encontrarPixelAbajo(matriz);
         int filaAbajo = abajo.getFila();
         extremos[1] = filaAbajo;
         //
-        Pixel izquierda = encontrarPixelIzquierda(m);
+        Pixel izquierda = encontrarPixelIzquierda(matriz);
         int columnaIzquierda = izquierda.getColumna();
         extremos[2] = columnaIzquierda;
         //
-        Pixel derecha = encontrarPixelDerecha(m);
+        Pixel derecha = encontrarPixelDerecha(matriz);
         int columnaDerecha = derecha.getColumna();
         extremos[3] = columnaDerecha;
         //
@@ -48,20 +45,22 @@ public class Figura{
         return extremos;
     }
 
-    public void encontrarCentroFigura(){
+    public int[] encontrarCentroFigura(){
+        int[] centroFigura=new int[2];
         int extremos [] = encontrarDimensiones();
         int centroAltura = ((extremos[0] + extremos[1]) / 2);
         int centroLargo = ((extremos[2] + extremos[3]) / 2);
+        centroFigura[0]=centroAltura;
+        centroFigura[1]=centroLargo;
+        return centroFigura;
     }
-
-    public void encontrarCentroMatriz(){
-        Imagen a1 = new Imagen("9.gif");//ToDo remover.
-        int m [][] = a1.getMatriz(); 
-        int centroAltura = ((m.length) / 2);
-        int centroLargo = ((m[0].length) / 2);
-        m[centroAltura][centroLargo] = - 916513156;
-        Imagen a2 = new Imagen(m);
-        a2.dibujar();
+    public int[] encontrarCentroMatriz(){
+        int [] centroMatriz=new int[2];
+        int centroAltura = ((matriz.length) / 2);
+        int centroLargo = ((matriz[0].length) / 2);
+        centroMatriz[0]=centroAltura;
+        centroMatriz[1]=centroLargo;
+        return centroMatriz;
     }
 
     public Pixel encontrarPixelArriba(int [][] matriz){
@@ -119,7 +118,32 @@ public class Figura{
         }
         return derecha;
     }
-
+    public int[][] crearMatrizBlanco(){
+        int[][] matrizBlanca=new int[matriz.length][matriz[0].length];
+        for(int f=0;f<matrizBlanca.length;++f){
+            for(int c=0;c<matrizBlanca[0].length;++c){
+                matrizBlanca[f][c]=-1;
+            }
+        }
+        return matrizBlanca;
+    }
+    public void centrarFigura(){
+        int[][] matrizNueva=crearMatrizBlanco();
+        int[] centroFigura=encontrarCentroFigura();
+        int[] centroMatriz=encontrarCentroMatriz();
+        int distanciaFilas=centroMatriz[0]-centroFigura[0];
+        int distanciaColumnas=centroMatriz[1]-centroFigura[1];
+        for(int f=0;f<matriz.length;++f){
+            for(int c=0;c<matriz[0].length;++c){
+                if(matriz[f][c]!=-1){
+                    int nuevaFila=f+distanciaFilas;
+                    int nuevaColumna=c+distanciaColumnas;
+                    matrizNueva[nuevaFila][nuevaColumna]=matriz[f][c];
+                }
+            }
+}
+        matriz=matrizNueva;
+}
     public int getAreaPixeles(){
         return areaPixeles;
     }
