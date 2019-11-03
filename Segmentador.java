@@ -140,6 +140,7 @@ public class Segmentador
             Figura figura=crearFigura();
             quitarFigura(figura);
             catalogo.agregarFigura(figura);
+            figura.centrarFigura();
         }
         catalogo.verCatalogo();
     }
