@@ -9,7 +9,9 @@ public class Pixel {
        this.columna=columna;
        this.color=color;
    }
-   
+   public void cambiarColor(int color){
+       this.color=color;
+   }
    public int getFila(){
        return fila;
    }
