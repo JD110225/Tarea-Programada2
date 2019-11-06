@@ -8,56 +8,59 @@ public class Segmentador
    private Catalogo catalogo;
    public Segmentador(){
        catalogo=new Catalogo();
-       imagen=new Imagen("imagenColoreada.gif");
+       imagen=new Imagen("superRandomImage.gif");
        imagen.dibujar();
        matrizImagen=imagen.getMatriz();
        fondo=new Pixel(0,0,matrizImagen[0][0]);
+       /*
        for(int f=0;f<matrizImagen.length;++f){
            for(int c=0;c<matrizImagen[0].length;++c){
                System.out.print(matrizImagen[f][c]+" ");
             }
        System.out.println();
         }
+        */
 
 }
    public boolean existePixel(int fila,int columna){
        return fila>=0 && columna>=0 && fila<matrizImagen.length && columna<matrizImagen[0].length;
     }    
-   //Recibe posicion de un pixel y retorna vector de Pixeles que estan en misma figura
-   public Pixel[] pixelesVecinos(int fila,int columna){ 
+
+   public void cambiarFondo(int fila,int columna){
+       matrizImagen[fila][columna]=1;
+       for(Pixel p:pixelesVecinos2(fila,columna)){
+            if(p!=null){
+                int filaVecino=p.getFila();
+                int columnaVecino=p.getColumna();
+                if(matrizImagen[filaVecino][columnaVecino]==fondo.getColor()){
+                cambiarFondo(filaVecino,columnaVecino);
+                }
+           }
+        }
+    }
+   public void displayMatriz(){
+          for(int f=0;f<matrizImagen.length;++f){
+           for(int c=0;c<matrizImagen[0].length;++c){
+               System.out.print(matrizImagen[f][c]+" ");
+            }
+           System.out.println();
+    }
+    }
+   //Recibe posicion de un pixel y retorna vector de Pixeles vecinos  
+   public Pixel[] pixelesVecinos2(int fila,int columna){ 
        Pixel[] pixelesVecinos=new Pixel[8];
        int contadorFilas=0;
-       int[] sumaF={ -1,-1, 0, 1, 1, 1, 0,-1 };
-       int[] sumaC={  0, 1, 1, 1, 0,-1,-1,-1 };
        for(int i=0;i<8;++i){
            int filaComparar=fila+sumaF[i];
            int columnaComparar=columna+sumaC[i];
            if(existePixel(filaComparar,columnaComparar)){
                int colorPixel=matrizImagen[filaComparar][columnaComparar];
-                Pixel pixelVecino=new Pixel(filaComparar,columnaComparar,colorPixel);
-                if(colorPixel!=fondo.getColor()){
-                    pixelesVecinos[contadorFilas++]=pixelVecino;               
-                }
+               Pixel pixelVecino=new Pixel(filaComparar,columnaComparar,colorPixel);
+               pixelesVecinos[contadorFilas++]=pixelVecino;                          
    }
 }   
         return pixelesVecinos;
 }
-  public Pixel[] vecinosIgualesFondo(int fila,int columna){ 
-      Pixel[] pixelesVecinos=new Pixel[4];
-      int contadorFilas=0;
-      for(int i=0;i<4;++i){
-          int filaComparar=fila+sumaF[i];
-          int columnaComparar=columna+sumaC[i];
-          if(existePixel(filaComparar,columnaComparar)){
-               int colorPixel=matrizImagen[filaComparar][columnaComparar];
-               Pixel pixelVecino=new Pixel(filaComparar,columnaComparar,colorPixel);
-               if(colorPixel==matrizImagen[fila][columna]){
-                   pixelesVecinos[contadorFilas++]=pixelVecino;               
-               }
-          }
-      }   
-      return pixelesVecinos;
-   }
     public Pixel findBorde(int[][] matriz){
         Pixel borde=fondo; 
         boolean encontrado=false;
@@ -75,47 +78,54 @@ public class Segmentador
         if(pixel!=null){
             int fila=pixel.getFila();
             int columna=pixel.getColumna();
-            matriz[fila][columna]=pixel.getColor();
+            matriz[fila][columna]=matrizImagen[fila][columna];
     }
     }
     public boolean estaEnMatriz(Pixel pixel,int [][] matriz){
-      int fila=pixel.getFila();
-      int columna=pixel.getColumna();
-      return matriz[fila][columna]==pixel.getColor();
+        int fila=pixel.getFila();
+        int columna=pixel.getColumna();
+        return matriz[fila][columna]==pixel.getColor();
     }
     public void algoritmoExpansion(Pixel pixel,int[][] matriz){
         anadirPixelMatriz(pixel,matriz);
         int fila=pixel.getFila();
         int columna=pixel.getColumna();
-        for(Pixel p:pixelesVecinos(fila,columna)){
+        for(Pixel p:pixelesVecinos2(fila,columna)){
             if(p!=null && !estaEnMatriz(p,matriz)){
-                algoritmoExpansion(p,matriz);
+                int filaVecino=p.getFila();
+                int columnaVecino=p.getColumna();
+                if(matrizImagen[filaVecino][columnaVecino]!=1){
+                    algoritmoExpansion(p,matriz);
             }
+            }
+            
     }
 }
-    public int[][] crearMatrizBlanca(){
+    public int[][] crearMatrizDeUnos(){
        int[][] matrizImagenNueva=new int[matrizImagen.length][matrizImagen[0].length];
        for(int f=0;f<matrizImagen.length;++f){
            for(int c=0;c<matrizImagen[0].length;++c){
-               matrizImagenNueva[f][c]=-1;//Hacer matriz de puros pixeles blancos
+               matrizImagenNueva[f][c]=1;//Hacer matriz de puros pixeles de 1 
             }
         }
        return matrizImagenNueva;
     }
+
     public Figura crearFigura(){
-        int[][] matriz=crearMatrizBlanca();
+        int[][] matriz=crearMatrizDeUnos();
         Pixel borde=findBorde(matrizImagen);
         algoritmoExpansion(borde,matriz);
         Figura figura=new Figura(matriz);
         return figura;
 }
+
     public void quitarFigura(Figura figura){
         int[][] matrizFigura=figura.getMatriz();
-        for(int f=0;f<matrizImagen.length;++f){
-            for(int c=0;c<matrizImagen[0].length;++c){
-                int color=matrizImagen[f][c];
-                if(color==matrizFigura[f][c] && color!=fondo.getColor()){
-                    matrizImagen[f][c]=fondo.getColor();
+        for(int f=0;f<matrizFigura.length;++f){
+            for(int c=0;c<matrizFigura[0].length;++c){
+                int color=matrizFigura[f][c];
+                if(color==matrizImagen[f][c]){
+                    matrizImagen[f][c]=1;
                 }
             }
         }
@@ -136,10 +146,12 @@ public class Segmentador
         return catalogo;
     }
     public void segmentacion(){
+        cambiarFondo(0,0);
         while(!sinFiguras(matrizImagen)){
             Figura figura=crearFigura();
             quitarFigura(figura);
             catalogo.agregarFigura(figura);
+            figura.centrarFigura();
         }
         catalogo.verCatalogo();
     }
