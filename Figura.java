@@ -1,23 +1,30 @@
 public class Figura{
     private int[][] matriz;
     private Imagen dibujo;
-    private int areaPixeles;
+    private int areaFigura;
     private int cantidadManchas;
     private int [] dimensiones;
-    private Pixel borde;
+    //private Pixel borde;
     private Pixel colorFondo;
     private int escala;
     /*
-     * este constructor lo usaremos mas adelante creo...
+     * este constructor lo usaremos mas adelante creo...Yo no...-KABU09
     public Figura(int[][]matriz,Pixel borde,Pixel colorFondo){
     this.matriz=matriz;
     this.borde=borde;
     this.colorFondo=colorFondo;
     }
      */
+    public Figura(int [][] matriz, int [] dimensiones){
+        this.matriz=matriz;
+        this.dimensiones = dimensiones;
+    }
+    
+    
     public Figura(int [][] matriz){
         this.matriz=matriz;
         dimensiones = new int [2];
+        //this.dimensiones = dimensiones;
     }
 
     public int [] encontrarDimensiones(){
@@ -54,23 +61,15 @@ public class Figura{
         centroFigura[1]=centroLargo;
         return centroFigura;
     }
-    public int[] encontrarCentroMatriz(){
-        int [] centroMatriz=new int[2];
-        int centroAltura = ((matriz.length) / 2);
-        int centroLargo = ((matriz[0].length) / 2);
-        centroMatriz[0]=centroAltura;
-        centroMatriz[1]=centroLargo;
-        return centroMatriz;
-    }
 
     public Pixel encontrarPixelArriba(int [][] matriz){
         Pixel arriba = null; 
-        boolean encontrado=false;
-        for(int f=0;f<matriz.length;f++){
-            for(int c=0;!encontrado&&c<matriz[0].length;c++){
-                if(matriz[f][c]!=matriz[0][0]){
+        boolean encontrado = false;
+        for(int f = 0;f < matriz.length;f++){
+            for(int c = 0;!encontrado && c < matriz[0].length;c++){
+                if(matriz[f][c]!= matriz[0][0]){
                     arriba = new Pixel(f,c,matriz[f][c]);
-                    encontrado=true;
+                    encontrado = true;
                 }
             }
         }
@@ -118,38 +117,80 @@ public class Figura{
         }
         return derecha;
     }
-    public int[][] crearMatrizBlanco(){
-        int[][] matrizBlanca=new int[matriz.length][matriz[0].length];
-        for(int f=0;f<matrizBlanca.length;++f){
-            for(int c=0;c<matrizBlanca[0].length;++c){
-                matrizBlanca[f][c]=-1;
+
+    public int[][] crearMatriz(int altura, int largo, int color){
+        int[][] matrizNueva=new int[matriz.length][matriz[0].length];
+        for(int f=0;f < altura; ++f){
+            for(int c=0; c < largo; ++c){
+                matrizNueva [f][c] = color;
             }
         }
-        return matrizBlanca;
-    }
-    public void centrarFigura(){
-        int[][] matrizNueva=crearMatrizBlanco();
-        int[] centroFigura=encontrarCentroFigura();
-        int[] centroMatriz=encontrarCentroMatriz();
-        int distanciaFilas=centroMatriz[0]-centroFigura[0];
-        int distanciaColumnas=centroMatriz[1]-centroFigura[1];
-        for(int f=0;f<matriz.length;++f){
-            for(int c=0;c<matriz[0].length;++c){
-                if(matriz[f][c]!=-1){
-                    int nuevaFila=f+distanciaFilas;
-                    int nuevaColumna=c+distanciaColumnas;
-                    matrizNueva[nuevaFila][nuevaColumna]=matriz[f][c];
-                }
-            }
-}
-        matriz=matrizNueva;
-}
-    public int getAreaPixeles(){
-        return areaPixeles;
+        return matrizNueva;
     }
 
-    public int[] getDimensiones(){
+    public Pixel encontrarBorde(int [][] matriz){
+        Pixel borde = null;
+        boolean encontrado=false;
+        for(int f = 0;f < matriz.length; f++){
+            for(int c = 0;!encontrado && c < matriz[0].length; c++){
+                if(matriz[f][c] != matriz[0][0]){
+                    borde = new Pixel(f,c,matriz[f][c]);
+                    encontrado = true;
+                }
+            }
+        }
+        return borde;
+    }
+    
+    public int [][] rellenarEspaciosMatriz(int [][] matriz, int color){//cambia el color del fondo
+        int colorFondo = this.matriz[0][0];
+        for(int f = 0; f < matriz.length; f++){
+            for(int c = 0; c < matriz[0].length; c++){
+                if(matriz[f][c] == colorFondo){
+                    matriz[f][c] = color;
+                }                
+            } 
+        }
+        return matriz;
+    }
+    
+    public void encontrarArea(){
+        
+        
+        Pixel bordeFigura = encontrarBorde(matriz);
+        int colorAlternativo = -352164851;
+        while(colorAlternativo == bordeFigura.getColor() || colorAlternativo == matriz[0][0]){
+            colorAlternativo = (int) (Math.random() * 2000);
+        }
+        
+        int [][] matrizDiferenteColor = matriz;
+        rellenarEspaciosMatriz(matrizDiferenteColor, colorAlternativo);
+        Imagen xy= new Imagen(matrizDiferenteColor);
+        xy.dibujar();
+        for(int f = 1; f < matrizDiferenteColor.length; f++){//podría ser altura en vez de matriz.length
+            for(int c = 1; c < matrizDiferenteColor[0].length; c++){//podría ser largo en vez de matriz[0].length
+                if(matrizDiferenteColor[f][c] != matrizDiferenteColor [0][0] && matrizDiferenteColor[f][c] != bordeFigura.getColor()){//solo sirve con figura sin manchas
+                    areaFigura++;
+                }
+            }
+        }
+        
+    }
+    
+    public int getAreaFigura(){
+        return areaFigura;
+    }
+
+    public int[] getDimensiones(){//puede servir en búsqueda por parámetros
         return dimensiones;
+    }
+
+    public int getAltura(){
+        return dimensiones[0];
+    }
+
+    public int getLargo(){
+        return dimensiones[1];
     }
 
     public int getEscala(){
@@ -160,6 +201,9 @@ public class Figura{
         return matriz;
     }
 
+    /*
+     * Parece no tener uso alguno
+     */
     public void displayMatriz(){
         for(int f=0;f<matriz.length;++f){
             for(int c=0;c<matriz[0].length;++c){
