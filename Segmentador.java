@@ -9,7 +9,7 @@ public class Segmentador{
 
     public Segmentador(){
         catalogo=new Catalogo();
-        imagen=new Imagen("11.gif");
+        imagen=new Imagen("ImagenPrueba.gif");
         imagen.dibujar();
         matrizImagen=imagen.getMatriz();
         fondo=new Pixel(0,0,matrizImagen[0][0]);
@@ -263,9 +263,59 @@ public class Segmentador{
         }
         return lista; //eventualmente creo que el método no retornará.
     }
+    
+    public int[][] hacerZoom(int[][] matriz, int[][] matriZoom){ //Creo que es posible quitar el matriz pero estoy muy cansado como para pensar en eso jeje
+            for(int f = 0; f< matriz.length; ++f){
+                for(int c = 0; c < matriz[f].length; ++c){
+                    if(matriz[f][c] != -1){
+                        matriZoom [f][c] = matriz[f][c];
+                        matriZoom [f-1][c] = matriz[f][c];
+                        matriZoom [f-1][c+1] = matriz [f][c];
+                        matriZoom [f][c+1] = matriz[f][c];
+                    }
+                }
+            }
+        return matriZoom; 
+    }
+    
+    public boolean zoomValido(int [][] matriz){ //falta cambiar X y Y por puntos máximos de las figuras.
+        boolean sePuede = true;
+        /**
+         * for(int i = 1; sePuede && i < 4; ++i){
+         *    if(matriz[x-i][y] == -1){
+         *      sePuede = false;
+         *    }
+         *    else{
+         *      if(matriz[x+i][y] == -1){
+         *          sePuede = false;
+         *      }
+         *      else{
+         *          if(matriz[x][y-i] == -1){
+         *              sePuede = false;
+         *          }
+         *          else{
+         *              if(matriz[x][y+i] == -1){
+         *                  sePuede = false;
+         *              }
+         *          }
+         *      }
+         *    }
+         *}
+         */
+        return sePuede;
+    }
+    
+    public int[][] zoom (int[][] matriz){
+        int escala = 0;
+        int [][] matriZoom = new int [matriz.length][matriz[0].length];
+        matriZoom = matriz;
+        boolean zoomValido = zoomValido(matriz);
+        while (zoomValido){
+            matriZoom = hacerZoom(matriz, matriZoom);
+            zoomValido = zoomValido(matriZoom);
+            escala += 2;
+        }
+        //figura.setEscala(escala); hay que solucionar el asignar la escala a la figura.
+        return matriZoom;
+    }
 }
-
-
-    
-    
-
