@@ -27,6 +27,10 @@ public class Figura{
         //this.dimensiones = dimensiones;
     }
 
+    /**
+     * Este método se encarga de encontrar las dimensiones de la figura.
+     * @return extremos, un vector que contiene la informacion de los puntos máximos.
+     */
     public int [] encontrarDimensiones(){
         int extremos [] = new int [4];
         Pixel arriba = encontrarPixelArriba(matriz);
@@ -52,6 +56,10 @@ public class Figura{
         return extremos;
     }
 
+    /**
+     * Este método se encarga de encontrar el centro de la figura.
+     * @return centroFigura, un vector con el punto que sea el centro de la figura.
+     */
     public int[] encontrarCentroFigura(){
         int[] centroFigura=new int[2];
         int extremos [] = encontrarDimensiones();
@@ -62,6 +70,11 @@ public class Figura{
         return centroFigura;
     }
 
+    /**
+     * Este método encuentra el pixel que se encuentra más arriba.
+     * @param int[][]matriz, para evaluar los pixeles en esa matriz.
+     * @return arriba, devuelve el pixel más arriba.
+     */
     public Pixel encontrarPixelArriba(int [][] matriz){
         Pixel arriba = null; 
         boolean encontrado = false;
@@ -76,6 +89,11 @@ public class Figura{
         return arriba;
     }
 
+    /**
+     * Este método encuentra el pixel que se encuentra más abajo.
+     * @param int[][]matriz, para evaluar los pixeles en esa matriz.
+     * @return abajo, devuelve el pixel más abajo.
+     */
     public Pixel encontrarPixelAbajo(int [][] matriz){
         Pixel abajo = null; 
         boolean encontrado = false;
@@ -90,6 +108,11 @@ public class Figura{
         return abajo;
     }
 
+    /**
+     * Este método encuentra el pixel que se encuentra más a la izquierda.
+     * @param int[][]matriz, para evaluar los pixeles en esa matriz.
+     * @return izquierda, devuelve el pixel más a la izquierda.
+     */
     public Pixel encontrarPixelIzquierda(int [][] matriz){
         Pixel izquierda = null; 
         boolean encontrado = false;
@@ -104,6 +127,11 @@ public class Figura{
         return izquierda;
     }
 
+     /**
+     * Este método encuentra el pixel que se encuentra más a la derecha.
+     * @param int[][]matriz, para evaluar los pixeles en esa matriz.
+     * @return derecha, devuelve el pixel más hacia la derecha.
+     */
     public Pixel encontrarPixelDerecha(int [][] matriz){
         Pixel derecha = null; 
         boolean encontrado = false;
@@ -118,6 +146,13 @@ public class Figura{
         return derecha;
     }
 
+    /**
+     * Este método crea una matriz con las especificaciones brindadas.
+     * @param int altura, para saber de que altura se desea la matriz.
+     * @param int largo, para saber de que largo se desea la matriz.
+     * @param int color, para saber de que color se desea la matriz.
+     * @return matrizNueva, la matriz resultante del proceso.
+     */
     public int[][] crearMatriz(int altura, int largo, int color){
         int[][] matrizNueva=new int[matriz.length][matriz[0].length];
         for(int f=0;f < altura; ++f){
@@ -128,6 +163,11 @@ public class Figura{
         return matrizNueva;
     }
 
+    /**
+     * Este método se encarga de encontrar un pixel que sea parte del borde en una matriz que se brinde.
+     * @param int[][] matriz, para evaluar los pixeles en esa matriz.
+     * @return Pixel, un pixel que sea parte del borde de la matriz.
+     */
     public Pixel encontrarBorde(int [][] matriz){
         Pixel borde = null;
         boolean encontrado=false;
@@ -142,6 +182,12 @@ public class Figura{
         return borde;
     }
     
+    /**
+     * Este método se encarga de rellenar los espacios en una matriz.
+     * @param matriz para rellenar la matriz brinda.
+     * @param color para saber de que color se desea rellenar la matriz
+     * @return matriz, la matriz rellenada con el color especificado.
+     */
     public int [][] rellenarEspaciosMatriz(int [][] matriz, int color){//cambia el color del fondo
         int colorFondo = this.matriz[0][0];
         for(int f = 0; f < matriz.length; f++){
@@ -154,6 +200,9 @@ public class Figura{
         return matriz;
     }
     
+    /**
+     * Este método se encarga de encontrar el área de una figura.
+     */
     public void encontrarArea(){
         
         
@@ -202,9 +251,9 @@ public class Figura{
     }
 
     /*
-     * Parece no tener uso alguno
+     * Este metodo se encarga de mostrar la matriz en la pantalla.
      */
-    public void displayMatriz(){
+    public void displayMatriz(){ //Parece no tener uso alguno
         for(int f=0;f<matriz.length;++f){
             for(int c=0;c<matriz[0].length;++c){
                 System.out.print(matriz[f][c]+" ");
@@ -216,5 +265,88 @@ public class Figura{
     public void verDibujo(){
         dibujo = new Imagen(matriz);
         dibujo.dibujar();
+    }
+    
+    /**
+     * Este método se encarga de hacer zoom en la matriz brindada
+     * @param matriz para saber a que matriz se le desea hacer zoom.
+     * @param matriZoom la matriz destino a el zoom
+     * @return matriZoom, una matriz con el zoom ya aplicado.
+     */
+    public int[][] hacerZoom(int[][] matriz, int[][] matriZoom){ //Creo que es posible quitar el matriz pero estoy muy cansado como para pensar en eso jeje
+        for(int f = 0; f< matriz.length; ++f){
+            for(int c = 0; c < matriz[f].length; ++c){
+                if(matriz[f][c] != -1){
+                    matriZoom [f][c] = matriz[f][c];
+                    matriZoom [f-1][c] = matriz[f][c];
+                    matriZoom [f-1][c+1] = matriz [f][c];
+                    matriZoom [f][c+1] = matriz[f][c];
+                }
+            }
+        }
+        return matriZoom; 
+    }
+    
+    /**
+     * Este método se encarga de determinar si es posible hacerle un zoom a la matriz.
+     * @param matriz para evaluar si es posible hacer zoom en esa matriz.
+     * @return sePuede, retorna si es válido hacer el zoom.
+     */
+    public boolean zoomValido(int [][] matriz){
+        boolean sePuede = true;
+        Pixel arriba = encontrarPixelArriba(matriz);
+        Pixel abajo = encontrarPixelArriba(matriz);
+        Pixel izquierda = encontrarPixelIzquierda(matriz);
+        Pixel derecha = encontrarPixelDerecha(matriz);
+        int [] datosArriba = new int [2];
+        datosArriba[0] = arriba.getFila();
+        datosArriba[1] = arriba.getColumna();
+        int [] datosAbajo = new int [2];
+        datosAbajo[0] = abajo.getFila();
+        datosAbajo[1] = abajo.getColumna();
+        int [] datosIzquierda = new int [2];
+        datosIzquierda[0] = izquierda.getFila();
+        datosIzquierda[1] = izquierda.getColumna();
+        int [] datosDerecha = new int [2];
+        datosDerecha[0] = derecha.getFila();
+        datosDerecha[1] = derecha.getColumna();
+        for(int i = 1; sePuede && i < 4; ++i){
+            if(matriz[datosArriba[0]-i][datosArriba[1]] == -1){
+                sePuede = false;
+            }
+            else{
+               if(matriz[datosAbajo[0]+i][datosAbajo[1]] == -1){
+                   sePuede = false;
+               }
+               else{
+                   if(matriz[datosIzquierda[0]][datosIzquierda[1]-i] == -1){
+                       sePuede = false;
+                   }
+                   else{
+                       if(matriz[datosDerecha[0]][datosDerecha[1]+i] == -1){
+                           sePuede = false;
+                       }
+                   }
+               }
+             }
+         }
+        return sePuede;
+    }
+    
+    /**
+     * Este método es el que se encarga de hacer el zoom hasta que no sea posible.
+     * @param matriz para realizar el zoom con base en esa matriz.
+     * @return matriZoom, devuelve la matriz con el zoom máximo posible.
+     */
+    public int[][] zoom (int[][] matriz){
+        int [][] matriZoom = new int [matriz.length][matriz[0].length];
+        matriZoom = matriz;
+        boolean zoomValido = zoomValido(matriz);
+        while (zoomValido){
+            matriZoom = hacerZoom(matriz, matriZoom);
+            zoomValido = zoomValido(matriZoom);
+            escala += 2;
+        }
+        return matriZoom;
     }
 }
