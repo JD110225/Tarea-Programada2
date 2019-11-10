@@ -9,8 +9,7 @@ public class Segmentador{
 
     public Segmentador(){
         catalogo=new Catalogo();
-        imagen=new Imagen("simple.gif");
-        //imagen.dibujar();
+        imagen=new Imagen("Prueba#100.gif");
         matrizImagen=imagen.getMatriz();
         fondo=new Pixel(0,0,matrizImagen[0][0]);
     }
@@ -161,13 +160,36 @@ public class Segmentador{
         int contador = 0;
         while(!sinFiguras(matrizImagen)){
             Figura figura=crearFigura();
+            //figura.verDibujo();
             quitarFigura(figura); 
             lista[contador++] = figura;
             //catalogo.agregarFigura(figura);
         }
         return lista;
     }
-
+    public void enviarFigurasACatalogo(){
+        Figura[] listaFiguras=segmentacion();     //Todas estas tienen un fondo negro...hay que ahora pasarlo a que sea blanco.
+        for(Figura figura: listaFiguras){
+            if(figura!=null){
+                int[][] matrizFigura=figura.getMatriz();
+                int[][] copiaMatrizFigura=new int[matrizFigura.length][matrizFigura[0].length];
+                for(int f=0;f<copiaMatrizFigura.length;++f){
+                    for(int c=0;c<copiaMatrizFigura[0].length;++c){
+                        if(matrizFigura[f][c]==1){
+                            copiaMatrizFigura[f][c]=fondo.getColor();
+                        }
+                        else{
+                            copiaMatrizFigura[f][c]=matrizFigura[f][c];
+                        }
+                    }
+                }
+                Figura nuevaFigura=new Figura(copiaMatrizFigura);  //Una nueva figura pero con fondo blanco y ya con las dimensiones averiguadas
+                int cantidadManchas=encontrarNumeroManchas(figura);
+                nuevaFigura.setCantidadManchas(cantidadManchas);
+                catalogo.agregarFigura(nuevaFigura);
+            }
+        }   
+    }
     public int datoMayorDeLista(int [] lista){//retorna el mayor numero de una lista
         int mayorDeLista = lista [0];
         for(int j = 1; j < lista.length; ++j){
@@ -201,7 +223,7 @@ public class Segmentador{
         int mayorAltura = datoMayorDeLista(alturas);
 
         int [] maximaMatriz = new int [2];
-        maximaMatriz[0] = mayorAltura; //podrÃ­a ser necesario sumar algo de borde mÃ¡s adelante.
+        maximaMatriz[0] = mayorAltura; //podría ser necesario sumar algo de borde más adelante.
         maximaMatriz[1] = mayorLargo;
 
         return maximaMatriz;
@@ -291,7 +313,20 @@ public class Segmentador{
             }
         }        
     }
-    
+    public int encontrarNumeroManchas(Figura figura){
+        if(figura!=null){
+            int[][] matrizFigura=figura.getMatriz();                
+            Pixel borde=findBorde(matrizFigura);
+            pintarBorde(borde.getFila(),borde.getColumna(),matrizFigura,borde);
+            Pixel fondoInterno=encontrarFondoInterno(matrizFigura);     
+            while(hayManchas(matrizFigura)){
+                quitarPixelesMancha(encontrarMancha(matrizFigura).getFila(),encontrarMancha(matrizFigura).getColumna(),matrizFigura);  //Que viva el Python
+                figura.sumarContadorManchas();
+        }
+        }
+        return figura.getCantidadManchas();
+    }
+    /*
     public Figura [] ejecutar(){
         Figura listaFiguras []  = segmentacion();
         Figura lista [] = new Figura [100];
@@ -315,33 +350,26 @@ public class Segmentador{
             temp.encontrarDimensiones();
             temp.encontrarArea();
             Figura figura = new Figura(matrizTemporal, temp.getDimensiones());//figura lista en recuadro grande mas sin Zoom, recibe dimensiones y area de la figura original y el escalado aplicado
-            //por aquÃ­ irÃ­a el mÃ©todo del Zoom. DAVID ROJAS: Puede usar la matriz "matrizTemporal" para su mÃ©todo.
-            //por aquÃ­ se agregarÃ­an las figuras al catÃ¡logo
+            //por aquí iría el método del Zoom. DAVID ROJAS: Puede usar la matriz "matrizTemporal" para su método.
+            //por aquí se agregarían las figuras al catálogo
             System.out.println(temp.getAreaFigura());
             lista[n] = figura;
         }
-        return lista; //eventualmente creo que el mÃ©todo no retornarÃ¡.
+        return lista; //eventualmente creo que el método no retornará.
     }
+    */
     public void ejecutarTEMPORAL(){
-        Figura[] listaFiguras=segmentacion();
-        for(Figura figura:listaFiguras){
+        enviarFigurasACatalogo();
+        for(Figura figura:catalogo.getFiguras()){
             if(figura!=null){
-                int[][] matrizFigura=figura.getMatriz();                
-                Pixel borde=findBorde(matrizFigura);
-                pintarBorde(borde.getFila(),borde.getColumna(),matrizFigura,borde);
-                Pixel fondoInterno=encontrarFondoInterno(matrizFigura);     
-                figura.verDibujo();
-                while(hayManchas(matrizFigura)){
-                    quitarPixelesMancha(encontrarMancha(matrizFigura).getFila(),encontrarMancha(matrizFigura).getColumna(),matrizFigura);  //Que viva el Python
-                    figura.sumarContadorManchas();
-        }
-            System.out.println("La cantidad de manchas es: "+figura.getCantidadManchas());
-        }
-        }
+                System.out.println("Cantidad de Manchas: "+figura.getCantidadManchas());
+            }
+            }
+        catalogo.dibujarFiguras();
+
     }
 }
 
 
-    
-    
 
+    

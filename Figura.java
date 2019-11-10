@@ -20,14 +20,15 @@ public class Figura{
         this.matriz=matriz;
         this.dimensiones = dimensiones;
     }
+    public Figura(int[][] matriz){
+        this.matriz=matriz;
+        dimensiones=new int[2];
+    }
+    public void setCantidadManchas(int cantidadManchas){
+        this.cantidadManchas=cantidadManchas;
+    }
     public void sumarContadorManchas(){
         ++cantidadManchas;
-    }
-    
-    public Figura(int [][] matriz){
-        this.matriz=matriz;
-        dimensiones = new int [2];
-        //this.dimensiones = dimensiones;
     }
     public int [] encontrarDimensiones(){
         int extremos [] = new int [4];
@@ -220,4 +221,81 @@ public class Figura{
         dibujo = new Imagen(matriz);
         dibujo.dibujar();
     }
+ public int[][] hacerZoom(int[][] matriz, int[][] matriZoom){ //Creo que es posible quitar el matriz pero estoy muy cansado como para pensar en eso jeje
+        for(int f = 0; f< matriz.length; ++f){
+            for(int c = 0; c < matriz[f].length; ++c){
+                if(matriz[f][c] != -1){
+                    matriZoom [f][c] = matriz[f][c];
+                    matriZoom [f-1][c] = matriz[f][c];
+                    matriZoom [f-1][c+1] = matriz [f][c];
+                    matriZoom [f][c+1] = matriz[f][c];
+                }
+            }
+        }
+        return matriZoom; 
+    }
+    
+    /**
+     * Este método se encarga de determinar si es posible hacerle un zoom a la matriz.
+     * @param matriz para evaluar si es posible hacer zoom en esa matriz.
+     * @return sePuede, retorna si es válido hacer el zoom.
+     */
+    public boolean zoomValido(int [][] matriz){
+        boolean sePuede = true;
+        Pixel arriba = encontrarPixelArriba(matriz);
+        Pixel abajo = encontrarPixelArriba(matriz);
+        Pixel izquierda = encontrarPixelIzquierda(matriz);
+        Pixel derecha = encontrarPixelDerecha(matriz);
+        int [] datosArriba = new int [2];
+        datosArriba[0] = arriba.getFila();
+        datosArriba[1] = arriba.getColumna();
+        int [] datosAbajo = new int [2];
+        datosAbajo[0] = abajo.getFila();
+        datosAbajo[1] = abajo.getColumna();
+        int [] datosIzquierda = new int [2];
+        datosIzquierda[0] = izquierda.getFila();
+        datosIzquierda[1] = izquierda.getColumna();
+        int [] datosDerecha = new int [2];
+        datosDerecha[0] = derecha.getFila();
+        datosDerecha[1] = derecha.getColumna();
+        for(int i = 1; sePuede && i < 4; ++i){
+            if(matriz[datosArriba[0]-i][datosArriba[1]] == -1){
+                sePuede = false;
+            }
+            else{
+               if(matriz[datosAbajo[0]+i][datosAbajo[1]] == -1){
+                   sePuede = false;
+               }
+               else{
+                   if(matriz[datosIzquierda[0]][datosIzquierda[1]-i] == -1){
+                       sePuede = false;
+                   }
+                   else{
+                       if(matriz[datosDerecha[0]][datosDerecha[1]+i] == -1){
+                           sePuede = false;
+                       }
+                   }
+               }
+             }
+         }
+        return sePuede;
+    }
+    
+    /**
+     * Este método es el que se encarga de hacer el zoom hasta que no sea posible.
+     * @param matriz para realizar el zoom con base en esa matriz.
+     * @return matriZoom, devuelve la matriz con el zoom máximo posible.
+     */
+    public int[][] zoom (int[][] matriz){
+        int [][] matriZoom = new int [matriz.length][matriz[0].length];
+        matriZoom = matriz;
+        boolean zoomValido = zoomValido(matriz);
+        while (zoomValido){
+            matriZoom = hacerZoom(matriz, matriZoom);
+            zoomValido = zoomValido(matriZoom);
+            escala += 2;
+        }
+        return matriZoom;
+    }
 }
+
