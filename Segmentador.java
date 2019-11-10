@@ -9,7 +9,7 @@ public class Segmentador{
 
     public Segmentador(){
         catalogo=new Catalogo();
-        imagen=new Imagen("ImagenPrueba.gif");
+        imagen=new Imagen("12.gif");//11.gif
         imagen.dibujar();
         matrizImagen=imagen.getMatriz();
         fondo=new Pixel(0,0,matrizImagen[0][0]);
@@ -151,9 +151,9 @@ public class Segmentador{
      * @return matrizImagenNueva, una matriz nueva con los valores indicados.
      */
     public int[][] crearMatriz(int fila, int columna, int color){
-        int[][] matrizImagenNueva=new int[fila][columna];
+        int[][] matrizImagenNueva = new int[fila][columna];
         for(int f = 0; f < fila ;++f){
-            for(int c = 0;c < columna;++c){
+            for(int c = 0; c < columna;++c){
                 matrizImagenNueva[f][c]= color;//Hacer matriz de puros pixeles de un color
             }
         }
@@ -281,8 +281,8 @@ public class Segmentador{
         int mayorAltura = datoMayorDeLista(alturas);
 
         int [] maximaMatriz = new int [2];
-        maximaMatriz[0] = mayorAltura; //podría ser necesario sumar algo de borde más adelante.
-        maximaMatriz[1] = mayorLargo;
+        maximaMatriz[0] = mayorAltura + 4; //+4
+        maximaMatriz[1] = mayorLargo + 4;//+4
 
         return maximaMatriz;
     }
@@ -311,46 +311,88 @@ public class Segmentador{
         }
         return matrizNueva;
     }
-
+    
+    public int [][] subirFigura(Figura figura){
+        figura.encontrarDimensiones();
+        int[][] matrizNueva= crearMatriz(figura.getMatriz().length, figura.getMatriz()[0].length, -1);
+        int arriba = figura.encontrarPixelArriba(figura.getMatriz()).getFila();
+        int izquierda = figura.encontrarPixelIzquierda(figura.getMatriz()).getColumna();
+        int distanciaFilas = 0 - arriba;
+        int distanciaColumnas = 0 - izquierda;
+        
+        for(int f = 0; f < figura.getMatriz().length; ++f){
+            for(int c = 0; c < figura.getMatriz()[0].length; ++c){
+                if(figura.getMatriz() [f][c]!= figura.getMatriz() [0][0]){//!= -1
+                    int nuevaFila = f + distanciaFilas;
+                    int nuevaColumna = c + distanciaColumnas;
+                    matrizNueva[nuevaFila][nuevaColumna] = figura.getMatriz()[f][c];
+                }
+            }
+        }
+        
+        return matrizNueva;
+    }
+    
+    public void prueba(){
+        Imagen nueva = new Imagen("17.gif");
+        Figura x = new Figura(nueva.getMatriz());
+        int colorBorde = nueva.getMatriz()[0][0];
+        int [][] subir = subirFigura(x);
+        Figura subida = new Figura(subir);
+        subida.verDibujo();
+        System.out.println("Color " + colorBorde);
+        
+    }
+    
     /**
      * Este es el método que se encarga de controlar el flujo del programa.
      * @return lista, 
      */
     public Figura [] ejecutar(){
+        
         Imagen hola = new Imagen("11.gif");//Para Pruebas BORRAR ANTES DE ENVIAR
-        int [][] pruebam = hola.getMatriz();//Para Pruebas BORRAR ANTES DE ENVIAR
+        int [][] pruebam = hola.getMatriz();//copiarMatriz(hola.getMatriz());//Para Pruebas BORRAR ANTES DE ENVIAR
         Figura prueba = new Figura(pruebam);//Para Pruebas BORRAR ANTES DE ENVIAR
         catalogo.agregarFigura(prueba);//Para Pruebas BORRAR ANTES DE ENVIAR
+        
         ////////////Para Pruebas BORRAR ANTES DE ENVIAR
-        Figura listaFiguras []  = new Figura [10];//segmentacion();//Para Pruebas BORRAR ANTES DE ENVIAR
+        
+        Figura listaFiguras []  = new Figura[10];//segmentacion();//Para Pruebas BORRAR ANTES DE ENVIAR
         /////
         listaFiguras[0] = prueba;//Para Pruebas BORRAR ANTES DE ENVIAR
         //////
         Figura lista [] = new Figura [100];
         int[] dimensionesMatriz = matrizMayorTamano(listaFiguras);
-        int matriz [][];
-
-        for(int n = 0; listaFiguras[n] != null && n < listaFiguras.length; n++){
-            matriz = crearMatriz(dimensionesMatriz[0], dimensionesMatriz[1], -1);
+        int [][] matrizFigura;
+        int [][] matrizMedio;
+        int[][] matrizTemporal;
+        for(int n = 0; listaFiguras[n] != null && n < listaFiguras.length; ++n){
+            Figura original = new Figura(listaFiguras[n].getMatriz());
             listaFiguras[n].encontrarDimensiones();
-            for(int f = 0; f < listaFiguras[n].getAltura(); f++){
-
-                for(int c = 0; c < listaFiguras[n].getLargo(); c++){
-
-                    matriz[f][c] = listaFiguras[n].getMatriz()[f][c];
-
+            matrizFigura = subirFigura(original); //figura original arriba y a la derecha, hasta aquí sirve
+            Figura x = new Figura(matrizFigura);
+            
+            matrizMedio = crearMatriz(500,500,-1);//dimensionesMatriz[0],dimensionesMatriz[1]
+            
+            for(int f = 0; f <= listaFiguras[n].getAltura(); f++){
+                for(int c = 0; c <= listaFiguras[n].getLargo(); c++){
+                    matrizMedio[f][c] = matrizFigura [f][c];
                 }
             }
+            
 
-            Figura temp = new Figura(listaFiguras[n].getMatriz());//figura sin segmentar
-            int[][] matrizTemporal = centrarFigura(temp, matriz);
-            temp.encontrarDimensiones();
-            temp.encontrarArea();
-            Figura figura = new Figura(matrizTemporal, temp.getDimensiones());//figura lista en recuadro grande mas sin Zoom, recibe dimensiones y area de la figura original y el escalado aplicado
+            matrizTemporal = centrarFigura(original, matrizMedio);
+            //listaFiguras[n].getDimensiones();
+            //listaFiguras[n].encontrarArea();
+            Figura sinZoom = new Figura(matrizTemporal);//figura lista en recuadro grande mas sin Zoom, recibe dimensiones y area de la figura original y el escalado aplicado
+            Figura ultima = new Figura(sinZoom.zoom(matrizTemporal));
+            System.out.println(sinZoom.getEscala());
+            sinZoom.verDibujo();
+            ultima.verDibujo();
             //por aquí iría el método del Zoom. DAVID ROJAS: Puede usar la matriz "matrizTemporal" para su método.
             //por aquí se agregarían las figuras al catálogo
-            System.out.println(temp.getAreaFigura());
-            lista[n] = figura;
+            //lista[n] = sinZoom;
+            
         }
         return lista; //eventualmente creo que el método no retornará.
     }
