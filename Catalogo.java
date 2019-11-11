@@ -40,6 +40,9 @@ public class Catalogo{
             mayorDelResto=posMayorFigura(i,figuras.length);
             swap(i,mayorDelResto);
         }
+        if(manchasIguales()){
+            reacomodoPorDimensiones();
+        }
     }
     public int mismaCantidadManchas(int indiceFigura){   //Retorna siguiente figura que tenga misma cantidad de mancha
         boolean encontrado=false;
@@ -86,17 +89,54 @@ public class Catalogo{
         }
         }
         }
+    public void imagenPorNumero(int numeroFigura){ //Mostrar imagen por numero figura
+        figuras[numeroFigura].verDibujo();
+    }
+    public void imagenRangoManchas(int min,int max){
+        for(int i=0;i<figuras.length;++i){
+            if(figuras[i]!=null){
+                int cantidadManchas=figuras[i].getCantidadManchas();
+                if(cantidadManchas>=min && cantidadManchas<=max){
+                    figuras[i].verDibujo();
+                }
+            }
+        }
+    }
+    public void imagenRangoEscala(int minEscala,int maxEscala){
+        for(int i=0;i<figuras.length;++i){
+            if(figuras[i]!=null){
+                int escala=figuras[i].getEscala();
+                if(escala>=minEscala && escala<=maxEscala){
+                    figuras[i].verDibujo();
+                }
+            }
+        }
+    }
+    public void imagenRangoDimension(int minAncho,int maxAncho,int minAltura,int maxAltura){
+        for(int i=0;i<figuras.length;++i){
+            if(figuras[i]!=null){
+                int altura=figuras[i].getDimensiones()[0];
+                int ancho=figuras[i].getDimensiones()[1];
+                if(altura>=minAltura && altura<=maxAltura && ancho>=minAncho && ancho<=maxAncho){
+                    figuras[i].verDibujo();
+                }
+            }
+        }        
+    }
+    public void imagenRangoArea(int minArea,int maxArea){
+        for(int i=0;i<figuras.length;++i){
+                if(figuras[i]!=null){
+                    int area=figuras[i].getAreaFigura();
+                    if(area>=minArea && area<=maxArea){
+                        figuras[i].verDibujo();
+                    }
+                }
+            }
+        }        
     
     public void dibujarFiguras(){
         ordenamientoFiguras();
-        if(manchasIguales()){
-            reacomodoPorDimensiones();
-        }
-        for(Figura f:figuras){
-            if(f!=null){
-                f.verDibujo();
-        }
-    }
+        imagenRangoManchas(3,6);
     }
 }
 

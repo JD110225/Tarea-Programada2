@@ -1,7 +1,7 @@
 public class Segmentador{
 
-    public static final int[] sumaF={ -1,-1, 0, 1, 1, 1, 0,-1 };
-    public static final int[] sumaC={  0, 1, 1, 1, 0,-1,-1,-1 };
+    public static final int[] sumaF={ 1,0, -1, 0, -1, 1, 1,-1 };
+    public static final int[] sumaC={  0, 1, 0, -1, 1,-1,1,-1 };
     private Imagen imagen;
     private int[][] matrizImagen;
     private Pixel fondo;
@@ -9,7 +9,7 @@ public class Segmentador{
 
     public Segmentador(){
         catalogo=new Catalogo();
-        imagen=new Imagen("Prueba#100.gif");
+        imagen=new Imagen("simple.gif");
         matrizImagen=imagen.getMatriz();
         fondo=new Pixel(0,0,matrizImagen[0][0]);
     }
@@ -35,19 +35,33 @@ public class Segmentador{
         return pixelesVecinos;
     }
     //Se le agrego parametro de matriz para que funcione en conjutno con pixelesVecinos.
+    public Pixel[] vecinosBorde(int fila,int columna,int[][] matriz){
+        Pixel[] pixelesVecinos=new Pixel[4]; //el de arriba y el de la derecha.
+        int contadorFilas=0;
+        for(int i=0;i<4;++i){
+            int filaComparar=fila+sumaF[i];
+            int columnaComparar=columna+sumaC[i];
+            if(existePixel(filaComparar,columnaComparar)){
+                int colorPixel=matrizImagen[filaComparar][columnaComparar];
+                Pixel pixelVecino=new Pixel(filaComparar,columnaComparar,colorPixel);
+                pixelesVecinos[contadorFilas++]=pixelVecino;
+        }
+    }
+        return pixelesVecinos;
+}
     public void cambiarFondo(int fila,int columna,int[][] matriz){
         matrizImagen[fila][columna]=1;
-        for(Pixel p:pixelesVecinos(fila,columna,matriz)){
+        for(Pixel p: vecinosBorde(fila,columna,matriz)){
             if(p!=null){
                 int filaVecino=p.getFila();
                 int columnaVecino=p.getColumna();
                 if(matrizImagen[filaVecino][columnaVecino]==fondo.getColor()){
+  
                     cambiarFondo(filaVecino,columnaVecino,matriz);
+        }
                 }
             }
         }
-    }
-
     public void displayMatriz(){
         for(int f=0;f<matrizImagen.length;++f){
             for(int c=0;c<matrizImagen[0].length;++c){
@@ -100,6 +114,7 @@ public class Segmentador{
 
         }
     }
+    
 
     public int[][] crearMatriz(int fila, int columna, int color){
         int[][] matrizImagenNueva=new int[fila][columna];
@@ -155,16 +170,14 @@ public class Segmentador{
 
     public Figura [] segmentacion(){
         cambiarFondo(0,0,matrizImagen);
-        imagen.dibujar();
         Figura lista [] = new Figura [100];
         int contador = 0;
         while(!sinFiguras(matrizImagen)){
             Figura figura=crearFigura();
-            //figura.verDibujo();
             quitarFigura(figura); 
             lista[contador++] = figura;
-            //catalogo.agregarFigura(figura);
         }
+        System.out.println(contador);
         return lista;
     }
     public void enviarFigurasACatalogo(){
@@ -250,7 +263,7 @@ public class Segmentador{
     }
 // TODO LO REFERENTE A MANCHAS A CONTINUACION
     public boolean esParteMancha(int f,int c,int[][] matrizFigura){
-        return matrizFigura[f][c]!=-123456789 && matrizFigura[f][c]!=1 && matrizFigura[f][c]!=encontrarFondoInterno(matrizFigura).getColor(); //Mistake could be here.
+        return matrizFigura[f][c]!=-123456789 && matrizFigura[f][c]!=1 && matrizFigura[f][c]!=encontrarFondoInterno(matrizFigura).getColor(); //
     }
     public Pixel encontrarMancha(int[][] matrizFigura){
         boolean encontrada=false;
@@ -277,6 +290,7 @@ public class Segmentador{
             }
         }        
     }
+
     public boolean hayManchas(int[][] matrizFigura){
         boolean hayManchas=false;
         for(int f=0;f<matrizFigura.length;++f){

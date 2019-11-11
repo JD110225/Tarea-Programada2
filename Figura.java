@@ -157,8 +157,6 @@ public class Figura{
     }
     
     public void encontrarArea(){
-        
-        
         Pixel bordeFigura = encontrarBorde(matriz);
         int colorAlternativo = -352164851;
         while(colorAlternativo == bordeFigura.getColor() || colorAlternativo == matriz[0][0]){
