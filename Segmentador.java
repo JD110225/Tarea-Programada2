@@ -6,11 +6,11 @@ public class Segmentador{
     private int[][] matrizImagen;
     private Pixel fondo;
     private Catalogo catalogo;
-
-    public Segmentador(){
+    
+    public Segmentador(String archivo){
         catalogo=new Catalogo();
-        imagen=new Imagen("simple.gif");
-        imagen.dibujar();
+        imagen=new Imagen(archivo);
+        //imagen.dibujar();
         matrizImagen=imagen.getMatriz();
         fondo=new Pixel(0,0,matrizImagen[0][0]);
     }
@@ -178,7 +178,7 @@ public class Segmentador{
             quitarFigura(figura); 
             lista[contador++] = figura;
         }
-        System.out.println(contador);
+        //System.out.println(contador);
         return lista;
     }
     public Figura[] quitarFondoFiguras(){ //quita el fondo negro y las centra.
@@ -200,13 +200,8 @@ public class Segmentador{
                     }
                 }
                 Figura nuevaFigura=new Figura(copiaMatrizFigura);  //Una nueva figura pero con fondo blanco y ya con las dimensiones averiguadas
-                //Figura sinFondo=new Figura(centrarFigura(nuevaFigura,nuevaFigura.getMatriz()));
                 int cantidadManchas=encontrarNumeroManchas(figura);
                 nuevaFigura.setCantidadManchas(cantidadManchas);
-                //sinFondo.setCantidadManchas(cantidadManchas);
-                //catalogo.agregarFigura(paraCatalogo);
-                //figurasSinFondo[contador++]=sinFondo;
-                //nuevaFigura.verDibujo();
                 figurasSinFondo[contador++]=nuevaFigura;
             }
         }
@@ -377,12 +372,23 @@ public class Segmentador{
     public void ejecutarDOS(){
          Figura[] listaFiguras=quitarFondoFiguras();
          for(Figura f:listaFiguras){
-             catalogo.agregarFigura(f);
+             if(f!=null){
+                 f.encontrarArea();
+                 f.encontrarDimensiones();
+                 f.zoom(f.getMatriz());
+                 int[][] matrizZoomeada=f.zoom(f.getMatriz());
+                 Imagen zoomeada=new Imagen(matrizZoomeada);
+                 Figura nueva=new Figura(matrizZoomeada,f.getDimensiones(),f.getAreaFigura(),f.getEscala());
+                 //No funciona figura nueva
+                 catalogo.agregarFigura(f);
+ 
+            }
             }
          catalogo.ordenamientoFiguras();
-         catalogo.verCatalogo();
     }
-    
+    public Catalogo getCatalogo(){
+        return catalogo;
+}
     public void ejecutarUNO(){
         Figura[] listaFiguras=quitarFondoFiguras(); 
         int[] dimensionesMatriz=matrizMayorTamano(listaFiguras);
@@ -398,10 +404,17 @@ public class Segmentador{
             Figura intermedia=new Figura(matrizIntermedia);
             int[][] matrizTemporal=centrarFigura(intermedia,matrizIntermedia);
             Figura FINAL= new Figura(matrizTemporal);
-            catalogo.agregarFigura(FINAL);
+            if(FINAL!=null){
+                FINAL.encontrarArea();
+                FINAL.encontrarDimensiones();
+                int[][] matrizZoomeada=FINAL.zoom(FINAL.getMatriz());
+                Imagen zoomeada=new Imagen(matrizZoomeada);
+                Figura nueva=new Figura(matrizZoomeada,FINAL.getDimensiones(),FINAL.getAreaFigura(),FINAL.getEscala());
+                catalogo.agregarFigura(nueva);
+        }
         }
         catalogo.ordenamientoFiguras();
-        catalogo.verCatalogo();
+        //catalogo.verCatalogo();
     }
 }
 

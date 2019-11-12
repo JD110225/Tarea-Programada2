@@ -1,6 +1,7 @@
-
+import java.io.PrintWriter;
 public class Catalogo{
     private Figura[] figuras;
+    private PrintWriter salida;
     private int indiceCatalogo;
     public Catalogo(){
         figuras=new Figura[100];
@@ -132,12 +133,32 @@ public class Catalogo{
                     }
                 }
             }
-        }        
-    
+        } 
+    public void generarArchivo(){
+        //ordenamientoFiguras();
+        Interfaz interfaz = new Interfaz();
+        try{
+            salida = new PrintWriter("figurasSegmentadas.txt");
+            salida.println(this);
+            salida.close();
+        }
+        catch(Exception x){
+            interfaz.mostrarError("Error al crear el archivo");
+        }
+
+    }
+    public String toString(){
+        String tira = "";
+        for(int i = 0; i < figuras.length; ++i){
+            if(figuras[i] != null){
+                tira+= (i) + ". " + figuras[i];
+            }
+        }
+        return tira;
+    }    
     public void dibujarFiguras(){
         ordenamientoFiguras();
-        //verCatalogo();
-        imagenRangoDimension(2,5,2,5);
+        verCatalogo();
     }
 }
 
