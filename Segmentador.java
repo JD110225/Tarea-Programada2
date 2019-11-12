@@ -438,10 +438,10 @@ public class Segmentador{
              if(f!=null){
                  f.encontrarArea();
                  f.encontrarDimensiones();
-                 f.zoom(f.getMatriz());
-                 int[][] matrizZoomeada=f.zoom(f.getMatriz());
-                 Imagen zoomeada=new Imagen(matrizZoomeada);
-                 Figura nueva=new Figura(matrizZoomeada,f.getDimensiones(),f.getAreaFigura(),f.getEscala());
+                 //f.zoom(f.getMatriz());
+                 //int[][] matrizZoomeada=f.zoom(f.getMatriz());
+                 //Imagen zoomeada=new Imagen(matrizZoomeada);
+                 //Figura nueva=new Figura(matrizZoomeada,f.getDimensiones(),f.getAreaFigura(),f.getEscala());
                  //No funciona figura nueva
                  catalogo.agregarFigura(f);
  
