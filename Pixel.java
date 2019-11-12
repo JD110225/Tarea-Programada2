@@ -24,7 +24,7 @@ public class Pixel {
    
    public String toString(){
        String tira="";
-       tira+="Fila: "+getFila()+"\n"+"Columna: "+getColumna()+"\n";
+       tira+="Fila: "+ getFila() +" Columna: "+ getColumna()+"\n";
        return tira;
    }
 }

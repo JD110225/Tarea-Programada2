@@ -15,15 +15,17 @@ public class Figura{
     this.colorFondo=colorFondo;
     }
      */
-    public Figura(int [][] matriz, int [] dimensiones){
+    public Figura(int [][] matriz, int [] dimensiones, int areaFigura){
         this.matriz=matriz;
         this.dimensiones = dimensiones;
+        this.areaFigura = areaFigura;
     }
     
     
     public Figura(int [][] matriz){
         this.matriz=matriz;
         dimensiones = new int [2];
+        areaFigura = 0;
         //this.dimensiones = dimensiones;
     }
 
@@ -31,29 +33,23 @@ public class Figura{
      * Este método se encarga de encontrar las dimensiones de la figura.
      * @return extremos, un vector que contiene la informacion de los puntos máximos.
      */
-    public int [] encontrarDimensiones(){
-        int extremos [] = new int [4];
+    public void encontrarDimensiones(){
         Pixel arriba = encontrarPixelArriba(matriz);
         int filaArriba = arriba.getFila();
-        extremos[0] = filaArriba;
         //
         Pixel abajo = encontrarPixelAbajo(matriz);
         int filaAbajo = abajo.getFila();
-        extremos[1] = filaAbajo;
         //
         Pixel izquierda = encontrarPixelIzquierda(matriz);
         int columnaIzquierda = izquierda.getColumna();
-        extremos[2] = columnaIzquierda;
         //
         Pixel derecha = encontrarPixelDerecha(matriz);
         int columnaDerecha = derecha.getColumna();
-        extremos[3] = columnaDerecha;
         //
         int altura = filaAbajo - filaArriba;
         int largo = columnaDerecha - columnaIzquierda;
-        dimensiones[0] = altura;
-        dimensiones[1] = largo;
-        return extremos;
+        dimensiones[0] = altura + 1;//sin más 1
+        dimensiones[1] = largo + 1;
     }
 
     /**
@@ -62,9 +58,8 @@ public class Figura{
      */
     public int[] encontrarCentroFigura(){
         int[] centroFigura=new int[2];
-        int extremos [] = encontrarDimensiones();
-        int centroAltura = ((extremos[0] + extremos[1]) / 2);
-        int centroLargo = ((extremos[2] + extremos[3]) / 2);
+        int centroAltura = ((dimensiones[0]) / 2);
+        int centroLargo = ((dimensiones[1]) / 2);
         centroFigura[0]=centroAltura;
         centroFigura[1]=centroLargo;
         return centroFigura;
@@ -181,49 +176,37 @@ public class Figura{
         }
         return borde;
     }
-    
-    /**
-     * Este método se encarga de rellenar los espacios en una matriz.
-     * @param matriz para rellenar la matriz brinda.
-     * @param color para saber de que color se desea rellenar la matriz
-     * @return matriz, la matriz rellenada con el color especificado.
-     */
-    public int [][] rellenarEspaciosMatriz(int [][] matriz, int color){//cambia el color del fondo
-        int colorFondo = this.matriz[0][0];
-        for(int f = 0; f < matriz.length; f++){
-            for(int c = 0; c < matriz[0].length; c++){
-                if(matriz[f][c] == colorFondo){
-                    matriz[f][c] = color;
-                }                
-            } 
+    public int [][] copiarMatriz(){
+        int [][] nuevaMatriz = new int [matriz.length][matriz[0].length];
+        for(int f = 0; f < matriz.length; ++f){
+            for(int c = 0; c < matriz[0].length; ++c){
+                nuevaMatriz[f][c] = matriz[f][c];
+            }
         }
-        return matriz;
+        return nuevaMatriz;
     }
-    
     /**
      * Este método se encarga de encontrar el área de una figura.
      */
     public void encontrarArea(){
-        
-        
-        Pixel bordeFigura = encontrarBorde(matriz);
-        int colorAlternativo = -352164851;
-        while(colorAlternativo == bordeFigura.getColor() || colorAlternativo == matriz[0][0]){
-            colorAlternativo = (int) (Math.random() * 2000);
-        }
-        
-        int [][] matrizDiferenteColor = matriz;
-        rellenarEspaciosMatriz(matrizDiferenteColor, colorAlternativo);
-        Imagen xy= new Imagen(matrizDiferenteColor);
-        xy.dibujar();
-        for(int f = 1; f < matrizDiferenteColor.length; f++){//podría ser altura en vez de matriz.length
-            for(int c = 1; c < matrizDiferenteColor[0].length; c++){//podría ser largo en vez de matriz[0].length
-                if(matrizDiferenteColor[f][c] != matrizDiferenteColor [0][0] && matrizDiferenteColor[f][c] != bordeFigura.getColor()){//solo sirve con figura sin manchas
-                    areaFigura++;
-                }
+        Figura segmentada = new Figura(matriz);
+        segmentada.encontrarDimensiones();
+        Pixel borde = segmentada.encontrarBorde(matriz);
+        int colorBorde = borde.getColor();
+        System.out.println("Borde " + borde.getColor());
+        int borde0 = matriz[0][0];
+        System.out.println("0,0 " + matriz[0][0]);
+        segmentada.verDibujo();
+        int area = 0;
+        for(int f = 0; f < matriz.length ; f++){
+            for(int c = 0; c < matriz[0].length; c++){
+                if(matriz[f][c] != borde0){                    
+                    area++;
+                }    
             }
         }
-        
+        areaFigura = area;
+        System.out.println("Area " + areaFigura);
     }
     
     public int getAreaFigura(){
@@ -249,7 +232,19 @@ public class Figura{
     public int[][] getMatriz(){
         return matriz;
     }
-
+    
+    public void setCantidadManchas(int cantidadManchas){
+        this.cantidadManchas=cantidadManchas;
+    }
+    
+    public void sumarContadorManchas(){
+        ++cantidadManchas;
+    }
+    
+    public int getCantidadManchas(){
+        return cantidadManchas;
+    }
+    
     /*
      * Este metodo se encarga de mostrar la matriz en la pantalla.
      */
@@ -277,10 +272,11 @@ public class Figura{
         for(int f = 0; f< matriz.length; ++f){
             for(int c = 0; c < matriz[f].length; ++c){
                 if(matriz[f][c] != -1){
-                    matriZoom [f][c] = matriz[f][c];
-                    matriZoom [f-1][c] = matriz[f][c];
-                    matriZoom [f-1][c+1] = matriz [f][c];
-                    matriZoom [f][c+1] = matriz[f][c];
+                    int pixelAZoomear = matriz[f][c];
+                    matriZoom [f][c] = pixelAZoomear;
+                    matriZoom [f][c+1] = pixelAZoomear;
+                    matriZoom [f+1][c] = pixelAZoomear;
+                    matriZoom [f][c+1] = pixelAZoomear;
                 }
             }
         }
@@ -339,13 +335,14 @@ public class Figura{
      * @return matriZoom, devuelve la matriz con el zoom máximo posible.
      */
     public int[][] zoom (int[][] matriz){
-        int [][] matriZoom = new int [matriz.length][matriz[0].length];
-        matriZoom = matriz;
+        int [][] matriZoom = crearMatriz(matriz.length,matriz[0].length, -1);
         boolean zoomValido = zoomValido(matriz);
-        while (zoomValido){
+        int c = 0;
+        while (c < 4){
             matriZoom = hacerZoom(matriz, matriZoom);
             zoomValido = zoomValido(matriZoom);
             escala += 2;
+            c++;
         }
         return matriZoom;
     }

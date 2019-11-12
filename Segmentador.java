@@ -8,8 +8,8 @@ public class Segmentador{
     private Catalogo catalogo;
 
     public Segmentador(){
-        catalogo=new Catalogo();
-        imagen=new Imagen("ImagenPrueba.gif");
+        catalogo = new Catalogo();
+        Imagen imagen = new Imagen("12.gif");//11.gif
         imagen.dibujar();
         matrizImagen=imagen.getMatriz();
         fondo=new Pixel(0,0,matrizImagen[0][0]);
@@ -25,15 +25,13 @@ public class Segmentador{
         return fila>=0 && columna>=0 && fila<matrizImagen.length && columna<matrizImagen[0].length;
     }    
 
-    //Recibe posicion de un pixel y retorna vector de Pixeles que estan en misma figura
-
     /**
      * Este método permite calcular los pixeles que sean vecinos.
      * @param int fila para saber en que fila se comparan los pixeles.
      * @param int columna para saber en que columna se comparan los pixeles.
      * @return Pixel retorna un vector de los pixeles que sean vecinos.
      */
-    public Pixel[] pixelesVecinos(int fila,int columna){ 
+    public Pixel[] pixelesVecinos(int fila,int columna,int[][] matriz){ 
         Pixel[] pixelesVecinos=new Pixel[8];
         int contadorFilas=0;
         for(int i=0;i<8;++i){
@@ -47,34 +45,41 @@ public class Segmentador{
         }   
         return pixelesVecinos;
     }
-    
+
+    /**
+     * 
+     */
+    public Pixel[] vecinosBorde(int fila,int columna,int[][] matriz){
+        Pixel[] pixelesVecinos=new Pixel[4]; //el de arriba y el de la derecha.
+        int contadorFilas=0;
+        for(int i=0;i<4;++i){
+            int filaComparar=fila+sumaF[i];
+            int columnaComparar=columna+sumaC[i];
+            if(existePixel(filaComparar,columnaComparar)){
+                int colorPixel=matrizImagen[filaComparar][columnaComparar];
+                Pixel pixelVecino=new Pixel(filaComparar,columnaComparar,colorPixel);
+                pixelesVecinos[contadorFilas++]=pixelVecino;
+            }
+        }
+        return pixelesVecinos;
+    }
+
     /**
      * Este método se encarga de cambiar el fondo de la imagen.
      * @param fila para ubicar los pixeles en la fila
      * @param columna para ubicar los pixeles en la columna
      */
-    public void cambiarFondo(int fila,int columna){
+    public void cambiarFondo(int fila,int columna,int[][] matriz){
         matrizImagen[fila][columna]=1;
-        for(Pixel p:pixelesVecinos(fila,columna)){
+        for(Pixel p: vecinosBorde(fila,columna,matriz)){
             if(p!=null){
                 int filaVecino=p.getFila();
                 int columnaVecino=p.getColumna();
                 if(matrizImagen[filaVecino][columnaVecino]==fondo.getColor()){
-                    cambiarFondo(filaVecino,columnaVecino);
+
+                    cambiarFondo(filaVecino,columnaVecino,matriz);
                 }
             }
-        }
-    }
-
-    /**
-     * Este método se encarga de mostrar la matriz de la imagen en pantalla. 
-     */
-    public void displayMatriz(){
-        for(int f=0;f<matrizImagen.length;++f){
-            for(int c=0;c<matrizImagen[0].length;++c){
-                System.out.print(matrizImagen[f][c]+" ");
-            }
-            System.out.println();
         }
     }
 
@@ -109,7 +114,7 @@ public class Segmentador{
             matriz[fila][columna]=matrizImagen[fila][columna];
         }
     }
-    
+
     /**
      * Este método es para saber si un pixel se encuentra en una matriz.
      * @param Pixel pixel, para saber que pixel debe buscar.
@@ -131,7 +136,7 @@ public class Segmentador{
         anadirPixelMatriz(pixel,matriz);
         int fila=pixel.getFila();
         int columna=pixel.getColumna();
-        for(Pixel p:pixelesVecinos(fila,columna)){
+        for(Pixel p:pixelesVecinos(fila,columna,matriz)){
             if(p!=null && !estaEnMatriz(p,matriz)){
                 int filaVecino=p.getFila();
                 int columnaVecino=p.getColumna();
@@ -171,7 +176,7 @@ public class Segmentador{
         Figura figura=new Figura(matriz);
         return figura;
     }
-    
+
     /**
      * Este método elimina una figura de su respectiva matriz.
      * @param Figura figura, para saber a que figura se le realiza el proceso.
@@ -226,14 +231,13 @@ public class Segmentador{
      * @return lista, devuelve una lista con las figuras segmentadas.
      */
     public Figura [] segmentacion(){
-        cambiarFondo(0,0);
+        cambiarFondo(0,0,matrizImagen);
         Figura lista [] = new Figura [100];
         int contador = 0;
         while(!sinFiguras(matrizImagen)){
             Figura figura=crearFigura();
             quitarFigura(figura); 
             lista[contador++] = figura;
-            //catalogo.agregarFigura(figura);
         }
         return lista;
     }
@@ -243,7 +247,7 @@ public class Segmentador{
      * @param int[] lista, para evaluar los elementos de la lista-
      * @return mayorDeLista, el numero mayor en la lista introducida.
      */
-    public int datoMayorDeLista(int [] lista){//retorna el mayor numero de una lista
+    public int datoMayorDeLista(int [] lista){
         int mayorDeLista = lista [0];
         for(int j = 1; j < lista.length; ++j){
             if(lista[j] > mayorDeLista){
@@ -281,8 +285,8 @@ public class Segmentador{
         int mayorAltura = datoMayorDeLista(alturas);
 
         int [] maximaMatriz = new int [2];
-        maximaMatriz[0] = mayorAltura; //podría ser necesario sumar algo de borde más adelante.
-        maximaMatriz[1] = mayorLargo;
+        maximaMatriz[0] = mayorAltura + 4;
+        maximaMatriz[1] = mayorLargo + 4;
 
         return maximaMatriz;
     }
@@ -312,46 +316,198 @@ public class Segmentador{
         return matrizNueva;
     }
 
+    public int [][] subirFigura(Figura figura){
+        figura.encontrarDimensiones();
+        int[][] matrizNueva= crearMatriz(figura.getMatriz().length, figura.getMatriz()[0].length, -1);
+        int arriba = figura.encontrarPixelArriba(figura.getMatriz()).getFila();
+        int izquierda = figura.encontrarPixelIzquierda(figura.getMatriz()).getColumna();
+        int distanciaFilas = 1 - arriba;
+        int distanciaColumnas = 1 - izquierda;
+        for(int f = 0; f < figura.getMatriz().length; ++f){
+            for(int c = 0; c < figura.getMatriz()[0].length; ++c){
+                if(figura.getMatriz() [f][c]!= figura.getMatriz() [0][0]){
+                    int nuevaFila = f + distanciaFilas;
+                    int nuevaColumna = c + distanciaColumnas;
+                    matrizNueva[nuevaFila][nuevaColumna] = figura.getMatriz()[f][c];
+                }
+            }
+        }
+        return matrizNueva;
+    }
+    //Manchas
+    public boolean esParteMancha(int f,int c,int[][] matrizFigura){
+        return matrizFigura[f][c]!=-123456789 && matrizFigura[f][c]!=1 && matrizFigura[f][c]!=encontrarFondoInterno(matrizFigura).getColor(); //
+    }
+
+    public Pixel encontrarMancha(int[][] matrizFigura){
+        boolean encontrada=false;
+        Pixel mancha=null; //En realidad es el primer pixel de una mancha 
+        for(int f=0;f<matrizFigura.length;++f){
+            for(int c=0;!encontrada && c<matrizFigura[0].length;++c){
+                if(esParteMancha(f,c,matrizFigura)){
+                    mancha =new Pixel(f,c,matrizFigura[f][c]);
+                    encontrada=true;
+                }
+            }
+        }
+        return mancha;
+    }
+
+    public void quitarPixelesMancha(int fila,int columna,int[][] matrizFigura){
+        matrizFigura[fila][columna]=1; //ponerlo del color de fondo.
+        for(Pixel p:pixelesVecinos(fila,columna,matrizFigura)){
+            if(p!=null){
+                int filaVecino=p.getFila();
+                int columnaVecino=p.getColumna();
+                if(esParteMancha(filaVecino,columnaVecino,matrizFigura)){
+                    quitarPixelesMancha(filaVecino,columnaVecino,matrizFigura);
+                }
+            }
+        }        
+    }
+
+    public boolean hayManchas(int[][] matrizFigura){
+        boolean hayManchas=false;
+        for(int f=0;f<matrizFigura.length;++f){
+            for(int c=0;!hayManchas&&c<matrizFigura[0].length;++c){        
+                if(esParteMancha(f,c,matrizFigura)){
+                    hayManchas=true;
+                }
+            }
+        }
+        return hayManchas;
+    }
+
+    public Pixel encontrarFondoInterno(int[][] matrizFigura){
+        boolean encontrado=false;
+        Pixel fondo=null;
+        for(int f=0; f<matrizFigura.length;++f){
+            for(int c=0;!encontrado && c<matrizFigura[0].length;++c){
+                if(matrizFigura[f][c]!=1 && matrizFigura[f][c]!=-123456789){ //Si no es igual al fondo/borde
+                    fondo=new Pixel(f,c,matrizFigura[f][c]);
+                    encontrado=true;
+                }                
+            }
+        }
+        return fondo;
+    }
+
+    public void pintarBorde(int fila,int columna,int[][] matrizFigura,Pixel borde){
+        matrizFigura[fila][columna]=-123456789;//color Exotico xD xD
+        for(Pixel p:pixelesVecinos(fila,columna,matrizFigura)){
+            if(p!=null){
+                int filaVecino=p.getFila();
+                int columnaVecino=p.getColumna();
+                if(matrizFigura[filaVecino][columnaVecino]==borde.getColor()){
+                    pintarBorde(filaVecino,columnaVecino,matrizFigura,borde);
+                }
+            }
+        }        
+    }
+
+    public int encontrarNumeroManchas(Figura figura){
+        if(figura!=null){
+            int[][] matrizFigura=figura.getMatriz();                
+            Pixel borde=findBorde(matrizFigura);
+            pintarBorde(borde.getFila(),borde.getColumna(),matrizFigura,borde);
+            Pixel fondoInterno=encontrarFondoInterno(matrizFigura);     
+            while(hayManchas(matrizFigura)){
+                quitarPixelesMancha(encontrarMancha(matrizFigura).getFila(),encontrarMancha(matrizFigura).getColumna(),matrizFigura);  //Que viva el Python
+                figura.sumarContadorManchas();
+            }
+        }
+        return figura.getCantidadManchas();
+    }
+
+    public void prueba(){
+        Imagen x = new Imagen("23.gif");
+        Figura f = new Figura(x.getMatriz());
+        int [][] y = subirFigura(f);
+        Figura gg = new Figura(y);
+        gg.verDibujo();
+    }
+
+    public Figura [] quitarFondoFigura(){
+        Figura [] listaFiguras = segmentacion();
+        Figura [] listaFigurasNueva = new Figura[listaFiguras.length];
+        int contador = 0;
+        for(Figura figura: listaFiguras){
+            if(figura!=null){
+                int[][] matrizFigura=figura.getMatriz();
+                int[][] copiaMatrizFigura=new int[matrizFigura.length][matrizFigura[0].length];
+                for(int f=0;f<copiaMatrizFigura.length;++f){
+                    for(int c=0;c<copiaMatrizFigura[0].length;++c){
+                        if(matrizFigura[f][c]==1){
+                            copiaMatrizFigura[f][c]=fondo.getColor();
+                        }
+                        else{
+                            copiaMatrizFigura[f][c]=matrizFigura[f][c];
+                        }
+                    }
+                }
+                Figura nuevaFigura=new Figura(copiaMatrizFigura);
+                nuevaFigura.verDibujo();
+                listaFigurasNueva[contador++] = nuevaFigura;
+            }
+        }
+        return listaFigurasNueva;
+    }
+
     /**
      * Este es el método que se encarga de controlar el flujo del programa.
-     * @return lista, 
+     *  
      */
-    public Figura [] ejecutar(){
-        Imagen hola = new Imagen("11.gif");//Para Pruebas BORRAR ANTES DE ENVIAR
-        int [][] pruebam = hola.getMatriz();//Para Pruebas BORRAR ANTES DE ENVIAR
-        Figura prueba = new Figura(pruebam);//Para Pruebas BORRAR ANTES DE ENVIAR
-        catalogo.agregarFigura(prueba);//Para Pruebas BORRAR ANTES DE ENVIAR
-        ////////////Para Pruebas BORRAR ANTES DE ENVIAR
-        Figura listaFiguras []  = new Figura [10];//segmentacion();//Para Pruebas BORRAR ANTES DE ENVIAR
-        /////
-        listaFiguras[0] = prueba;//Para Pruebas BORRAR ANTES DE ENVIAR
-        //////
+    public void ejecutar(){
+        Figura listaFiguras []  = quitarFondoFigura();
+        for(int i = 0; i < listaFiguras.length; ++i){
+            if(listaFiguras[i] != null){
+                listaFiguras[i].verDibujo();
+            }
+        }
+        
         Figura lista [] = new Figura [100];
+
         int[] dimensionesMatriz = matrizMayorTamano(listaFiguras);
-        int matriz [][];
+        int [][] matrizFigura;
+        int [][] matrizMedio;
+        int[][] matrizTemporal;
 
-        for(int n = 0; listaFiguras[n] != null && n < listaFiguras.length; n++){
-            matriz = crearMatriz(dimensionesMatriz[0], dimensionesMatriz[1], -1);
+        for(int n = 0; listaFiguras[n] != null && n < listaFiguras.length; ++n){
+
+            //Figura original = new Figura(listaFiguras[n].getMatriz());
+
             listaFiguras[n].encontrarDimensiones();
-            for(int f = 0; f < listaFiguras[n].getAltura(); f++){
 
-                for(int c = 0; c < listaFiguras[n].getLargo(); c++){
+            listaFiguras[n].encontrarArea();
 
-                    matriz[f][c] = listaFiguras[n].getMatriz()[f][c];
+            matrizFigura = subirFigura(listaFiguras[n]);
 
+            Figura x = new Figura(matrizFigura);
+
+            matrizMedio = crearMatriz(dimensionesMatriz[0],dimensionesMatriz[1],-1);
+
+            for(int f = 0; f <= listaFiguras[n].getAltura(); f++){
+                for(int c = 0; c <= listaFiguras[n].getLargo(); c++){
+                    matrizMedio[f][c] = matrizFigura [f][c];
                 }
             }
 
-            Figura temp = new Figura(listaFiguras[n].getMatriz());//figura sin segmentar
-            int[][] matrizTemporal = centrarFigura(temp, matriz);
-            temp.encontrarDimensiones();
-            temp.encontrarArea();
-            Figura figura = new Figura(matrizTemporal, temp.getDimensiones());//figura lista en recuadro grande mas sin Zoom, recibe dimensiones y area de la figura original y el escalado aplicado
+            matrizTemporal = centrarFigura(listaFiguras[n], matrizMedio);
+            Figura sinZoom = new Figura(matrizTemporal, listaFiguras[n].getDimensiones(),listaFiguras[n].getAreaFigura());//figura lista en recuadro grande mas sin Zoom, recibe dimensiones y area de la figura original y el escalado aplicado
+            //sinZoom.verDibujo();
+            catalogo.agregarFigura(sinZoom);
+            /*
+            Figura ultima = new Figura(sinZoom.zoom(matrizTemporal));//para catálogo
+            System.out.println(sinZoom.getEscala());
+            sinZoom.verDibujo();
+            ultima.verDibujo();
             //por aquí iría el método del Zoom. DAVID ROJAS: Puede usar la matriz "matrizTemporal" para su método.
             //por aquí se agregarían las figuras al catálogo
-            System.out.println(temp.getAreaFigura());
-            lista[n] = figura;
+            //lista[n] = sinZoom;
+             */
+
         }
-        return lista; //eventualmente creo que el método no retornará.
+        catalogo.verCatalogo();
+        System.out.println("Length " + listaFiguras.length);
     }
 }
