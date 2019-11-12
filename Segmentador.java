@@ -14,13 +14,21 @@ public class Segmentador{
         matrizImagen=imagen.getMatriz();
         fondo=new Pixel(0,0,matrizImagen[0][0]);
     }
-
+    /**
+     * Este método permite saber si un pixel se encuentra en una fila y columna.
+     * @param int fila para buscar el pixel en esa fila.
+     * @param int columna para buscar el pixel en esa columna.
+     * @return boolean existePixel devuelve el valor booleano para saber si el pixel existe.
+     */
     public boolean existePixel(int fila,int columna){
         return fila>=0 && columna>=0 && fila<matrizImagen.length && columna<matrizImagen[0].length;
     }    
-
-    //Recibe posicion de un pixel y retorna vector de Pixeles que estan en misma figura
-    //Se le agrego un parametro mas al metodo para reutilizarlo en clase:IdentificadorManchas
+    /**
+     * Este método permite calcular los pixeles que sean vecinos.
+     * @param int fila para saber en que fila se comparan los pixeles.
+     * @param int columna para saber en que columna se comparan los pixeles.
+     * @return Pixel retorna un vector de los pixeles que sean vecinos.
+     */
     public Pixel[] pixelesVecinos(int fila,int columna,int[][] matriz){ 
         Pixel[] pixelesVecinos=new Pixel[8];
         int contadorFilas=0;
@@ -50,6 +58,11 @@ public class Segmentador{
     }
         return pixelesVecinos;
 }
+        /**
+     * Este método se encarga de cambiar el fondo de la imagen.
+     * @param fila para ubicar los pixeles en la fila
+     * @param columna para ubicar los pixeles en la columna
+     */
     public void cambiarFondo(int fila,int columna,int[][] matriz){
         matrizImagen[fila][columna]=1;
         for(Pixel p: vecinosBorde(fila,columna,matriz)){
@@ -71,7 +84,11 @@ public class Segmentador{
             System.out.println();
         }
     }
-
+    /**
+     * Este método se encarga de encontrar el borde en una matriz.
+     * @param int[][] matriz, para tomar los pixeles que conforman la imagen.
+     * @return borde, retorna un pixel que sea parte del borde de la figura.
+     */
     public Pixel findBorde(int [][] matriz){
         Pixel borde=fondo; 
         boolean encontrado=false;
@@ -85,7 +102,11 @@ public class Segmentador{
         }
         return borde;
     }
-
+    /**
+     * Este método se encarga de añadir un pixel a la matriz.
+     * @param Pixel pixel para saber cual es el pixel que se desea añadir a la matriz.
+     * @param int[][] matriz, para saber en la matriz que desea añadir el pixel.
+     */
     public void anadirPixelMatriz(Pixel pixel,int[][] matriz){
         if(pixel!=null){
             int fila=pixel.getFila();
@@ -93,13 +114,22 @@ public class Segmentador{
             matriz[fila][columna]=matrizImagen[fila][columna];
         }
     }
-
+    /**
+     * Este método es para saber si un pixel se encuentra en una matriz.
+     * @param Pixel pixel, para saber que pixel debe buscar.
+     * @param int[][] matriz, para saber en que matriz se debe buscar.
+     * @return boolean, el resultado de si el pixel se encuentra la matriz.
+     */
     public boolean estaEnMatriz(Pixel pixel,int [][] matriz){
         int fila=pixel.getFila();
         int columna=pixel.getColumna();
         return matriz[fila][columna]==pixel.getColor();
     }
-
+    /**
+     * Este método permite, mediante un proceso recursivo, 
+     * @param Pixel pixel, para saber en que pixel 
+     * @param int[][] matriz, 
+     */
     public void algoritmoExpansion(Pixel pixel,int[][] matriz){
         anadirPixelMatriz(pixel,matriz);
         int fila=pixel.getFila();
@@ -116,7 +146,13 @@ public class Segmentador{
         }
     }
     
-
+    /**
+     * Este método permite crear una matriz con las caracteristicas deseadas.
+     * @param int fila, permite saber de cuantas filas se quiere la matriz.
+     * @param int columna, permite saber de cuantas columnas se quiere la matriz.
+     * @param int color, permite saber con que color se va a crear la matriz.
+     * @return matrizImagenNueva, una matriz nueva con los valores indicados.
+     */
     public int[][] crearMatriz(int fila, int columna, int color){
         int[][] matrizImagenNueva=new int[fila][columna];
         for(int f = 0; f < fila ;++f){
@@ -126,7 +162,10 @@ public class Segmentador{
         }
         return matrizImagenNueva;
     }
-
+    /**
+     * Este metodo permite, con ayuda de otros métodos, crear una figura.
+     * @return figura, retorna la figura creada.
+     */
     public Figura crearFigura(){
         int[][] matriz = crearMatriz(matrizImagen.length, matrizImagen[0].length, 1);
         Pixel borde=findBorde(matrizImagen);
@@ -134,7 +173,10 @@ public class Segmentador{
         Figura figura=new Figura(matriz);
         return figura;
     }
-
+  /**
+     * Este método elimina una figura de su respectiva matriz.
+     * @param Figura figura, para saber a que figura se le realiza el proceso.
+     */
     public void quitarFigura(Figura figura){
         int[][] matrizFigura=figura.getMatriz();
         for(int f=0;f<matrizFigura.length;++f){
@@ -146,7 +188,11 @@ public class Segmentador{
             }
         }
     }
-
+    /**
+     * Este método permite saber si una matriz contiene o no una figura.
+     * @param int[][] matriz, para evaluar sobre la matriz que se indique.
+     * @return sinFiguras, devuelve el resultado del proceso.
+     */
     public boolean sinFiguras(int[][] matriz){
         boolean sinFiguras=true;
         int inicial=matriz[0][0];
@@ -159,7 +205,12 @@ public class Segmentador{
         }
         return sinFiguras;
     }
-
+    /**
+     * Este método permite encontrar el centro de una matriz.
+     * @param int altura, para saber la altura que tiene la matriz. 
+     * @param int largo, para saber el largo que tiene la matriz
+     * @return centroMatriz, que es un vector que contiene cual es el centro de la altura y del largo.
+     */
     public int[] encontrarCentroMatriz(int altura, int largo){
         int [] centroMatriz = new int[2];
         int centroAltura = ((altura) / 2);
@@ -168,7 +219,10 @@ public class Segmentador{
         centroMatriz[1] = centroLargo;
         return centroMatriz;
     }
-
+    /**
+     * Este metodo se encarga de segmentar las figuras.
+     * @return lista, devuelve una lista con las figuras segmentadas.
+     */
     public Figura [] segmentacion(){
         cambiarFondo(0,0,matrizImagen);
         Figura lista [] = new Figura [100];
@@ -208,6 +262,11 @@ public class Segmentador{
         
         return figurasSinFondo;
     }
+        /**
+     * Este método permite determinar el numero que sea mayor en una lista.
+     * @param int[] lista, para evaluar los elementos de la lista-
+     * @return mayorDeLista, el numero mayor en la lista introducida.
+     */
     public int datoMayorDeLista(int [] lista){//retorna el mayor numero de una lista
         int mayorDeLista = lista [0];
         for(int j = 1; j < lista.length; ++j){
@@ -217,7 +276,11 @@ public class Segmentador{
         }
         return mayorDeLista;
     }
-
+    /**
+     * Este método encuentra la matriz de mayor tamaño entre la lista de figuras.
+     * @param Figura [] listaFiguras, para evaluar esta lista.
+     * @return maximaMatriz, retorna los valores maximos de la matriz.
+     */
     public int [] matrizMayorTamano(Figura [] listaFiguras){//encuentra la matriz de mayor tamano entre la lista de figuras
         int [] largos = new int [listaFiguras.length];
         int [] alturas = new int [listaFiguras.length];
@@ -241,7 +304,7 @@ public class Segmentador{
         int mayorAltura = datoMayorDeLista(alturas);
 
         int [] maximaMatriz = new int [2];
-        maximaMatriz[0] = mayorAltura; //podr�a ser necesario sumar algo de borde m�s adelante.
+        maximaMatriz[0] = mayorAltura; //podría ser necesario sumar algo de borde más adelante.
         maximaMatriz[1] = mayorLargo;
 
         return maximaMatriz;
@@ -326,9 +389,9 @@ public class Segmentador{
         return figura.getCantidadManchas();
     }
     /**
-     * Este m�todo se encarga de centrar una figura.
+     * Este método se encarga de centrar una figura.
      * @param Figura figura, para saber que figura debe centrar.
-     * @param int[][] matriz, para crear una nueva matriz con el tama�o correcto.
+     * @param int[][] matriz, para crear una nueva matriz con el tamaño correcto.
      * @return matrizNueva, la matriz de la figura centrada.
      */
     public int[][] centrarFigura(Figura figura, int [][] matriz){
