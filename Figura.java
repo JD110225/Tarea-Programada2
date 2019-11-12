@@ -30,6 +30,10 @@ public class Figura{
     public void sumarContadorManchas(){
         ++cantidadManchas;
     }
+    /**
+     * Este método se encarga de encontrar las dimensiones de la figura.
+     * @return extremos, un vector que contiene la informacion de los puntos máximos.
+     */
     public int [] encontrarDimensiones(){
         int extremos [] = new int [4];
         Pixel arriba = encontrarPixelArriba(matriz);
@@ -55,6 +59,7 @@ public class Figura{
         return extremos;
     }
 
+    /*
     public int[] encontrarCentroFigura(){
         int[] centroFigura=new int[2];
         int extremos [] = encontrarDimensiones();
@@ -64,7 +69,20 @@ public class Figura{
         centroFigura[1]=centroLargo;
         return centroFigura;
     }
-
+*/
+    /**
+     * Este método se encarga de encontrar el centro de la figura.
+     * @return centroFigura, un vector con el punto que sea el centro de la figura.
+     */
+    public int[] encontrarCentroFigura(){
+        int[] centroFigura=new int[2];
+        int extremos [] = encontrarDimensiones();
+        int centroAltura = ((extremos[0] + extremos[1]) / 2);
+        int centroLargo = ((extremos[2] + extremos[3]) / 2);
+        centroFigura[0]=centroAltura;
+        centroFigura[1]=centroLargo;
+        return centroFigura;
+    }
     public Pixel encontrarPixelArriba(int [][] matriz){
         Pixel arriba = null; 
         boolean encontrado = false;
@@ -166,7 +184,7 @@ public class Figura{
         int [][] matrizDiferenteColor = matriz;
         rellenarEspaciosMatriz(matrizDiferenteColor, colorAlternativo);
         Imagen xy= new Imagen(matrizDiferenteColor);
-        xy.dibujar();
+        //xy.dibujar();
         for(int f = 1; f < matrizDiferenteColor.length; f++){//podrÃ­a ser altura en vez de matriz.length
             for(int c = 1; c < matrizDiferenteColor[0].length; c++){//podrÃ­a ser largo en vez de matriz[0].length
                 if(matrizDiferenteColor[f][c] != matrizDiferenteColor [0][0] && matrizDiferenteColor[f][c] != bordeFigura.getColor()){//solo sirve con figura sin manchas

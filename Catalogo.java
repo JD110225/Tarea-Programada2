@@ -136,7 +136,8 @@ public class Catalogo{
     
     public void dibujarFiguras(){
         ordenamientoFiguras();
-        imagenRangoManchas(3,6);
+        //verCatalogo();
+        imagenRangoDimension(2,5,2,5);
     }
 }
 

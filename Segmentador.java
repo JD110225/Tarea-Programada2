@@ -10,6 +10,7 @@ public class Segmentador{
     public Segmentador(){
         catalogo=new Catalogo();
         imagen=new Imagen("simple.gif");
+        imagen.dibujar();
         matrizImagen=imagen.getMatriz();
         fondo=new Pixel(0,0,matrizImagen[0][0]);
     }
@@ -180,8 +181,10 @@ public class Segmentador{
         System.out.println(contador);
         return lista;
     }
-    public void enviarFigurasACatalogo(){
+    public Figura[] quitarFondoFiguras(){ //quita el fondo negro y las centra.
         Figura[] listaFiguras=segmentacion();     //Todas estas tienen un fondo negro...hay que ahora pasarlo a que sea blanco.
+        Figura[] figurasSinFondo=new Figura[listaFiguras.length];
+        int contador=0;
         for(Figura figura: listaFiguras){
             if(figura!=null){
                 int[][] matrizFigura=figura.getMatriz();
@@ -197,11 +200,18 @@ public class Segmentador{
                     }
                 }
                 Figura nuevaFigura=new Figura(copiaMatrizFigura);  //Una nueva figura pero con fondo blanco y ya con las dimensiones averiguadas
+                //Figura sinFondo=new Figura(centrarFigura(nuevaFigura,nuevaFigura.getMatriz()));
                 int cantidadManchas=encontrarNumeroManchas(figura);
                 nuevaFigura.setCantidadManchas(cantidadManchas);
-                catalogo.agregarFigura(nuevaFigura);
+                //sinFondo.setCantidadManchas(cantidadManchas);
+                //catalogo.agregarFigura(paraCatalogo);
+                //figurasSinFondo[contador++]=sinFondo;
+                //nuevaFigura.verDibujo();
+                figurasSinFondo[contador++]=nuevaFigura;
             }
-        }   
+        }
+        
+        return figurasSinFondo;
     }
     public int datoMayorDeLista(int [] lista){//retorna el mayor numero de una lista
         int mayorDeLista = lista [0];
@@ -240,26 +250,6 @@ public class Segmentador{
         maximaMatriz[1] = mayorLargo;
 
         return maximaMatriz;
-    }
-
-    public int[][] centrarFigura(Figura figura, int [][] matriz){
-        int[][] matrizNueva= crearMatriz(matriz.length, matriz[0].length, -1);
-        int[] centroFigura = figura.encontrarCentroFigura();
-        int[] centroMatriz = encontrarCentroMatriz(matriz.length, matriz[0].length);
-        int distanciaFilas = centroMatriz[0] - centroFigura[0];
-        int distanciaColumnas = centroMatriz[1] - centroFigura[1];
-
-        for(int f=0; f < matriz.length; ++f){
-            for(int c=0; c < matriz[0].length; ++c){
-                if(matriz [f][c]!=-1){
-                    int nuevaFila = f + distanciaFilas;
-                    int nuevaColumna = c + distanciaColumnas;
-                    matrizNueva[nuevaFila][nuevaColumna] = matriz[f][c];
-                
-                }
-            }
-        }
-        return matrizNueva;
     }
 // TODO LO REFERENTE A MANCHAS A CONTINUACION
     public boolean esParteMancha(int f,int c,int[][] matrizFigura){
@@ -340,49 +330,84 @@ public class Segmentador{
         }
         return figura.getCantidadManchas();
     }
-    /*
-    public Figura [] ejecutar(){
-        Figura listaFiguras []  = segmentacion();
-        Figura lista [] = new Figura [100];
-        int[] dimensionesMatriz = matrizMayorTamano(listaFiguras);
-        int matriz [][];
+    /**
+     * Este método se encarga de centrar una figura.
+     * @param Figura figura, para saber que figura debe centrar.
+     * @param int[][] matriz, para crear una nueva matriz con el tamaño correcto.
+     * @return matrizNueva, la matriz de la figura centrada.
+     */
+    public int[][] centrarFigura(Figura figura, int [][] matriz){
+        int[][] matrizNueva= crearMatriz(matriz.length, matriz[0].length, -1);
+        int[] centroFigura = figura.encontrarCentroFigura();
+        int[] centroMatriz = encontrarCentroMatriz(matriz.length, matriz[0].length);
+        int distanciaFilas = centroMatriz[0] - centroFigura[0];
+        int distanciaColumnas = centroMatriz[1] - centroFigura[1];
 
-        for(int n = 0; listaFiguras[n] != null && n < listaFiguras.length; n++){
-            matriz = crearMatriz(dimensionesMatriz[0], dimensionesMatriz[1], -1);
-            listaFiguras[n].encontrarDimensiones();
-            for(int f = 0; f < listaFiguras[n].getAltura(); f++){
-
-                for(int c = 0; c < listaFiguras[n].getLargo(); c++){
-
-                    matriz[f][c] = listaFiguras[n].getMatriz()[f][c];
-                    //Que viva el Python!
+        for(int f=0; f < matriz.length; ++f){
+            for(int c=0; c < matriz[0].length; ++c){
+                if(matriz [f][c]!=-1){
+                    int nuevaFila = f + distanciaFilas;
+                    int nuevaColumna = c + distanciaColumnas;
+                    matrizNueva[nuevaFila][nuevaColumna] = matriz[f][c];
+                
                 }
             }
-
-            Figura temp = new Figura(listaFiguras[n].getMatriz());//figura sin segmentar
-            int[][] matrizTemporal = centrarFigura(temp, matriz);
-            temp.encontrarDimensiones();
-            temp.encontrarArea();
-            Figura figura = new Figura(matrizTemporal, temp.getDimensiones());//figura lista en recuadro grande mas sin Zoom, recibe dimensiones y area de la figura original y el escalado aplicado
-            //por aquí iría el método del Zoom. DAVID ROJAS: Puede usar la matriz "matrizTemporal" para su método.
-            //por aquí se agregarían las figuras al catálogo
-            System.out.println(temp.getAreaFigura());
-            lista[n] = figura;
         }
-        return lista; //eventualmente creo que el método no retornará.
+        return matrizNueva;
     }
-    */
-    public void ejecutarTEMPORAL(){
-        enviarFigurasACatalogo();
-        for(Figura figura:catalogo.getFiguras()){
-            if(figura!=null){
-                System.out.println("Cantidad de Manchas: "+figura.getCantidadManchas());
+    public int [][] subirFigura(Figura figura){
+        figura.encontrarDimensiones();
+        int[][] matrizNueva= crearMatriz(figura.getMatriz().length, figura.getMatriz()[0].length, -1);
+        int arriba = figura.encontrarPixelArriba(figura.getMatriz()).getFila();
+        int izquierda = figura.encontrarPixelIzquierda(figura.getMatriz()).getColumna();
+        int distanciaFilas = - arriba;
+        int distanciaColumnas = - izquierda;
+        for(int f = 0; f < figura.getMatriz().length; ++f){
+            for(int c = 0; c < figura.getMatriz()[0].length; ++c){
+                if(figura.getMatriz() [f][c]!= figura.getMatriz() [0][0]){
+                    int nuevaFila = f + distanciaFilas;
+                    int nuevaColumna = c + distanciaColumnas;
+                    matrizNueva[nuevaFila][nuevaColumna] = figura.getMatriz()[f][c];
+                }
             }
-            }
-        catalogo.dibujarFiguras();
+        }
+        return matrizNueva;
+    }
 
+    public void ejecutarDOS(){
+         Figura[] listaFiguras=quitarFondoFiguras();
+         for(Figura f:listaFiguras){
+             catalogo.agregarFigura(f);
+            }
+         catalogo.ordenamientoFiguras();
+         catalogo.verCatalogo();
+    }
+    
+    public void ejecutarUNO(){
+        Figura[] listaFiguras=quitarFondoFiguras(); 
+        int[] dimensionesMatriz=matrizMayorTamano(listaFiguras);
+        for(int i=0;listaFiguras[i]!=null && i<listaFiguras.length;++i){
+            Figura figura=listaFiguras[i];
+            int[][] matrizFigura=subirFigura(figura);
+            int[][] matrizIntermedia=crearMatriz(dimensionesMatriz[0],dimensionesMatriz[1],-1);            
+            for(int f=0;f<matrizIntermedia.length;++f){
+                for(int c=0;c<matrizIntermedia[0].length;++c){ //hmm
+                        matrizIntermedia[f][c]=matrizFigura[f][c];
+                }
+            }
+            Figura intermedia=new Figura(matrizIntermedia);
+            int[][] matrizTemporal=centrarFigura(intermedia,matrizIntermedia);
+            Figura FINAL= new Figura(matrizTemporal);
+            catalogo.agregarFigura(FINAL);
+        }
+        catalogo.ordenamientoFiguras();
+        catalogo.verCatalogo();
     }
 }
+
+
+    
+
 
 
 
