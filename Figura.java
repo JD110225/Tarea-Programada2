@@ -15,17 +15,15 @@ public class Figura{
     this.colorFondo=colorFondo;
     }
      */
-    public Figura(int [][] matriz, int [] dimensiones, int areaFigura){
+    public Figura(int [][] matriz, int [] dimensiones){
         this.matriz=matriz;
         this.dimensiones = dimensiones;
-        this.areaFigura = areaFigura;
     }
     
     
     public Figura(int [][] matriz){
         this.matriz=matriz;
         dimensiones = new int [2];
-        areaFigura = 0;
         //this.dimensiones = dimensiones;
     }
 
@@ -48,8 +46,8 @@ public class Figura{
         //
         int altura = filaAbajo - filaArriba;
         int largo = columnaDerecha - columnaIzquierda;
-        dimensiones[0] = altura + 1;//sin más 1
-        dimensiones[1] = largo + 1;
+        dimensiones[0] = altura;
+        dimensiones[1] = largo;
     }
 
     /**
@@ -176,7 +174,7 @@ public class Figura{
         }
         return borde;
     }
-    public int [][] copiarMatriz(){
+    public int [][] copiarMatriz(int [][] matriz){
         int [][] nuevaMatriz = new int [matriz.length][matriz[0].length];
         for(int f = 0; f < matriz.length; ++f){
             for(int c = 0; c < matriz[0].length; ++c){
@@ -189,24 +187,7 @@ public class Figura{
      * Este método se encarga de encontrar el área de una figura.
      */
     public void encontrarArea(){
-        Figura segmentada = new Figura(matriz);
-        segmentada.encontrarDimensiones();
-        Pixel borde = segmentada.encontrarBorde(matriz);
-        int colorBorde = borde.getColor();
-        System.out.println("Borde " + borde.getColor());
-        int borde0 = matriz[0][0];
-        System.out.println("0,0 " + matriz[0][0]);
-        segmentada.verDibujo();
-        int area = 0;
-        for(int f = 0; f < matriz.length ; f++){
-            for(int c = 0; c < matriz[0].length; c++){
-                if(matriz[f][c] != borde0){                    
-                    area++;
-                }    
-            }
-        }
-        areaFigura = area;
-        System.out.println("Area " + areaFigura);
+        int [][] nuevaMatriz = crearMatriz(matriz.length, matriz[0].length, -31455485);
     }
     
     public int getAreaFigura(){
@@ -228,23 +209,14 @@ public class Figura{
     public int getEscala(){
         return escala;
     }
-
+    
+    public void setEscala(int escala){
+        this.escala = escala;
+    }
     public int[][] getMatriz(){
         return matriz;
     }
-    
-    public void setCantidadManchas(int cantidadManchas){
-        this.cantidadManchas=cantidadManchas;
-    }
-    
-    public void sumarContadorManchas(){
-        ++cantidadManchas;
-    }
-    
-    public int getCantidadManchas(){
-        return cantidadManchas;
-    }
-    
+
     /*
      * Este metodo se encarga de mostrar la matriz en la pantalla.
      */
@@ -274,9 +246,9 @@ public class Figura{
                 if(matriz[f][c] != -1){
                     int pixelAZoomear = matriz[f][c];
                     matriZoom [f][c] = pixelAZoomear;
-                    matriZoom [f][c+1] = pixelAZoomear;
-                    matriZoom [f+1][c] = pixelAZoomear;
-                    matriZoom [f][c+1] = pixelAZoomear;
+                    matriZoom [f][c-1] = pixelAZoomear;
+                    matriZoom [f-1][c] = pixelAZoomear;
+                    matriZoom [f-1][c-1] = pixelAZoomear;
                 }
             }
         }
@@ -288,46 +260,6 @@ public class Figura{
      * @param matriz para evaluar si es posible hacer zoom en esa matriz.
      * @return sePuede, retorna si es válido hacer el zoom.
      */
-    public boolean zoomValido(int [][] matriz){
-        boolean sePuede = true;
-        Pixel arriba = encontrarPixelArriba(matriz);
-        Pixel abajo = encontrarPixelArriba(matriz);
-        Pixel izquierda = encontrarPixelIzquierda(matriz);
-        Pixel derecha = encontrarPixelDerecha(matriz);
-        int [] datosArriba = new int [2];
-        datosArriba[0] = arriba.getFila();
-        datosArriba[1] = arriba.getColumna();
-        int [] datosAbajo = new int [2];
-        datosAbajo[0] = abajo.getFila();
-        datosAbajo[1] = abajo.getColumna();
-        int [] datosIzquierda = new int [2];
-        datosIzquierda[0] = izquierda.getFila();
-        datosIzquierda[1] = izquierda.getColumna();
-        int [] datosDerecha = new int [2];
-        datosDerecha[0] = derecha.getFila();
-        datosDerecha[1] = derecha.getColumna();
-        for(int i = 1; sePuede && i < 4; ++i){
-            if(matriz[datosArriba[0]-i][datosArriba[1]] == -1){
-                sePuede = false;
-            }
-            else{
-               if(matriz[datosAbajo[0]+i][datosAbajo[1]] == -1){
-                   sePuede = false;
-               }
-               else{
-                   if(matriz[datosIzquierda[0]][datosIzquierda[1]-i] == -1){
-                       sePuede = false;
-                   }
-                   else{
-                       if(matriz[datosDerecha[0]][datosDerecha[1]+i] == -1){
-                           sePuede = false;
-                       }
-                   }
-               }
-             }
-         }
-        return sePuede;
-    }
     
     /**
      * Este método es el que se encarga de hacer el zoom hasta que no sea posible.
@@ -335,15 +267,61 @@ public class Figura{
      * @return matriZoom, devuelve la matriz con el zoom máximo posible.
      */
     public int[][] zoom (int[][] matriz){
-        int [][] matriZoom = crearMatriz(matriz.length,matriz[0].length, -1);
-        boolean zoomValido = zoomValido(matriz);
-        int c = 0;
-        while (c < 4){
-            matriZoom = hacerZoom(matriz, matriZoom);
-            zoomValido = zoomValido(matriZoom);
-            escala += 2;
-            c++;
+        int [][] matriZoom = copiarMatriz(matriz);
+        boolean zoomValido = valioGaver(matriz);
+        for(int i = 1;zoomValido; ++i){
+            int [][] temporal = crearMatriz(matriz.length, matriz[0].length, -1);
+            temporal = hacerZoom(matriz, temporal);
+            matriz = copiarMatriz(temporal);
+            matriZoom = copiarMatriz(temporal);
+            zoomValido = valioGaver(matriZoom);
+            escala = i * 2;
         }
         return matriZoom;
+    }
+    public int [] datos(){
+        int [] datos = new int [8];
+        Pixel arriba = encontrarPixelArriba(matriz);
+        Pixel abajo = encontrarPixelArriba(matriz);
+        Pixel izquierda = encontrarPixelIzquierda(matriz);
+        Pixel derecha = encontrarPixelDerecha(matriz);
+        datos[0]= arriba.getFila();
+        datos[1]= arriba.getColumna();
+        datos[2]= abajo.getFila();
+        datos[3]= abajo.getColumna();
+        datos[4]= izquierda.getFila();
+        datos[5]= izquierda.getColumna();
+        datos[6]= derecha.getFila();
+        datos[7]= derecha.getColumna();
+        return datos;
+    }
+    public boolean valioGaver(int [][] matriz){
+        int [] datos = datos();
+        boolean zoomeable = true;
+        for(int i = 1; zoomeable && i < 2; ++i){
+            if(matriz[datos[0]-i][datos[1]] != -1){ //datos pixel arriba
+                zoomeable = false;
+                System.out.println("1");
+            }
+            else{
+                if(matriz[datos[2]+i][datos[3]] != -1){ //datos pixel abajo
+                    zoomeable = false;
+                    System.out.println("2");
+                }
+                else{
+                    if(matriz[datos[4]][datos[5]-i] != -1){ // datos pixel izquierda
+                        zoomeable = false;
+                        System.out.println("3");
+                    }
+                    else{
+                        if(matriz[datos[6]][datos[7]+i] != -1){ // datos pixel derecha
+                            zoomeable = false;
+                            System.out.println("4");
+                        }
+                    }
+                }
+            }
+        }
+        return zoomeable;
     }
 }
